@@ -4,8 +4,11 @@ import org.example.domain.Category;
 import org.example.domain.Post;
 import org.example.exception.PostNotFoundException;
 import org.example.service.PostService;
+import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
 
+@RestController
 public class PostController {
     private final PostService service;
 
