@@ -9,9 +9,13 @@ import org.example.repository.InMemoryPostRepository;
 import org.example.service.PostIdGenerator;
 import org.example.service.PostService;
 import java.util.Scanner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SpringBootApplication
 public class Main {
     public static void main(String[] args) {
+        SpringApplication.run(Main.class, args);
         // 시작할 때 필요한 객체를 직접 만들고 연결합니다.
         PostService service = new PostService(new InMemoryPostRepository(), new PostIdGenerator());
         PostController controller = new PostController(service);
