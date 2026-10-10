@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Repository
 public interface PostRepository {
     void save(Post post);
     Post findById(long id);

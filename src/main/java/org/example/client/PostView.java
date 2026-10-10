@@ -4,7 +4,8 @@ import org.example.controller.ApiResponse;
 import org.example.domain.Category;
 import org.example.domain.Post;
 import java.util.List;
-
+//view 서버에서는 필요 없음.
+/*
 public class PostView {
     private final PostInput input;
     private final PostOutput output;
@@ -85,3 +86,4 @@ public class PostView {
         output.printMessage(message);
     }
 }
+*/
