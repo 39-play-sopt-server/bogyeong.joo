@@ -1,6 +1,8 @@
 package org.example.repository;
 
 import org.example.domain.Post;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
 public interface PostRepository {

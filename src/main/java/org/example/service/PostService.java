@@ -4,8 +4,11 @@ import org.example.domain.Category;
 import org.example.domain.Post;
 import org.example.exception.PostNotFoundException;
 import org.example.repository.PostRepository;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 
+@Service
 public class PostService {
     private final PostRepository repository;
     private final PostIdGenerator idGenerator;
