@@ -6,6 +6,7 @@ import org.example.exception.PostNotFoundException;
 import org.example.repository.PostRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,8 +25,24 @@ public class PostService {
         return post;
     }
 
-    public List<Post> findAll() {
-        return repository.findAll();
+    public List<Post> findAll(int page, int size) {
+        if (page < 0) {
+            throw new IllegalArgumentException("page는 0 이상이어야 합니다.");
+        }
+        if (size <= 0) {
+            throw new IllegalArgumentException("size는 1 이상이어야 합니다.");
+        }
+
+        List<Post> posts = repository.findAll();
+        // 큰 page와 size를 곱해도 int 범위를 넘어서 잘못된 인덱스가 되지 않도록 합니다.
+        long offset = (long) page * size;
+        if (offset >= posts.size()) {
+            return List.of();
+        }
+
+        int fromIndex = (int) offset;
+        int toIndex = (int) Math.min(offset + size, posts.size());
+        return new ArrayList<>(posts.subList(fromIndex, toIndex));
     }
 
     public Post findById(long id) {

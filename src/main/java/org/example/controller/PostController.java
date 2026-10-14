@@ -33,9 +33,11 @@ public class PostController implements PostControllerDocs {
     // 게시글 목록 조회
     @Override
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Post>>> findAll() {
-
-        return ResponseEntity.ok(ApiResponse.success("게시글 목록을 조회했습니다.", service.findAll()));
+    public ResponseEntity<ApiResponse<List<Post>>> findAll(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(ApiResponse.success("게시글 목록을 조회했습니다.", service.findAll(page, size)));
     }
 
     // 게시글 단건 조회

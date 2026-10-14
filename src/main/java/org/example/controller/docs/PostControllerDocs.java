@@ -1,6 +1,7 @@
 package org.example.controller.docs;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.controller.dto.CreatePostRequest;
 import org.example.controller.dto.UpdatePostRequest;
@@ -20,8 +21,11 @@ public interface PostControllerDocs {
 
     @Operation(
             summary = "게시글 목록 조회",
-            description = "전체 게시글을 오름차순으로 조회합니다.")
-    ResponseEntity<ApiResponse<List<Post>>> findAll();
+            description = "게시글을 오름차순으로 정렬한 뒤 요청한 페이지를 반환합니다.(페이지네이션 적용)")
+    ResponseEntity<ApiResponse<List<Post>>> findAll(
+            @Parameter(name = "page") int page,
+            @Parameter(name = "size") int size
+    );
 
     @Operation(
             summary = "게시글 상세 조회",
