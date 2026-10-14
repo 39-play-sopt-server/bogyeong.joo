@@ -25,7 +25,7 @@ public class PostService {
         return post;
     }
 
-    public List<Post> findAll(int page, int size) {
+    public List<Post> findAll(int page, int size, Category category) {
         if (page < 0) {
             throw new IllegalArgumentException("page는 0 이상이어야 합니다.");
         }
@@ -34,6 +34,15 @@ public class PostService {
         }
 
         List<Post> posts = repository.findAll();
+        if (category != null) {
+            List<Post> filteredPosts = new ArrayList<>();
+            for (Post post : posts) {
+                if (post.getCategory() == category) {
+                    filteredPosts.add(post);
+                }
+            }
+            posts = filteredPosts;
+        }
         // 큰 page와 size를 곱해도 int 범위를 넘어서 잘못된 인덱스가 되지 않도록 합니다.
         long offset = (long) page * size;
         if (offset >= posts.size()) {
@@ -53,7 +62,7 @@ public class PostService {
         return post;
     }
 
-    // 상세 조회에서만 조회수를 증가시키고, 수정과 삭제에서는 기존 조회를 사용합니다.
+    // 상세 조회에서만 조회수를 증가시키고, 수정과 삭제에서는 기존 조회를 사용
     public Post getDetail(long id) {
         Post post = findById(id);
         post.increaseViewCount();

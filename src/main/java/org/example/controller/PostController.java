@@ -2,6 +2,7 @@ package org.example.controller;
 
 import org.example.controller.dto.CreatePostRequest;
 import org.example.controller.dto.UpdatePostRequest;
+import org.example.domain.Category;
 import org.example.domain.Post;
 import org.example.controller.docs.PostControllerDocs;
 import org.example.global.response.ApiResponse;
@@ -35,9 +36,10 @@ public class PostController implements PostControllerDocs {
     @GetMapping
     public ResponseEntity<ApiResponse<List<Post>>> findAll(
             @RequestParam(name = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size
+            @RequestParam(name = "size", defaultValue = "10") int size,
+            @RequestParam(name = "category", required = false) Category category
     ) {
-        return ResponseEntity.ok(ApiResponse.success("게시글 목록을 조회했습니다.", service.findAll(page, size)));
+        return ResponseEntity.ok(ApiResponse.success("게시글 목록을 조회했습니다.", service.findAll(page, size, category)));
     }
 
     // 게시글 단건 조회
