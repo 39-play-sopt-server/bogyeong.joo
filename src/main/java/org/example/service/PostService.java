@@ -36,6 +36,13 @@ public class PostService {
         return post;
     }
 
+    // 상세 조회에서만 조회수를 증가시키고, 수정과 삭제에서는 기존 조회를 사용합니다.
+    public Post getDetail(long id) {
+        Post post = findById(id);
+        post.increaseViewCount();
+        return post;
+    }
+
     public Post update(long id, String title, String content, Category category) {
         Post post = findById(id);
         post.update(title, content, category);

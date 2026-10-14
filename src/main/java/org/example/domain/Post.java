@@ -10,6 +10,7 @@ public class Post {
     private final String author;
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private long viewCount;
 
     public Post(long id, String title, String content, Category category, String author) {
         validateText(title, "제목");
@@ -23,6 +24,11 @@ public class Post {
         this.author = author.trim();
         this.createdAt = LocalDateTime.now();
         this.updatedAt = null;
+        this.viewCount = 0;
+    }
+
+    public void increaseViewCount() {
+        this.viewCount++;
     }
 
     // 모든 값을 먼저 검증해서 실패한 수정이 일부 필드만 바꾸지 않도록 합니다.
@@ -69,5 +75,9 @@ public class Post {
     }
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
+    }
+
+    public long getViewCount() {
+        return viewCount;
     }
 }

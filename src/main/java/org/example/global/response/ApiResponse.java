@@ -1,4 +1,4 @@
-package org.example.controller;
+package org.example.global.response;
 
 public class ApiResponse<T> {
     private final boolean success;

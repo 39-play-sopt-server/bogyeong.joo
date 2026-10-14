@@ -3,8 +3,10 @@ package org.example.controller;
 import org.example.controller.dto.CreatePostRequest;
 import org.example.controller.dto.UpdatePostRequest;
 import org.example.domain.Post;
-import org.example.exception.PostNotFoundException;
+import org.example.global.response.ApiResponse;
 import org.example.service.PostService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,56 +22,39 @@ public class PostController {
 
     // 게시글 작성
     @PostMapping
-    public ApiResponse<Post> create(@RequestBody CreatePostRequest request) {
-        try {
-            return ApiResponse.success("게시글이 작성되었습니다.",
-                    service.create(request.title(), request.content(), request.category(), request.author()));
-        } catch (IllegalArgumentException e) {
-            return ApiResponse.failure("INVALID_INPUT", e.getMessage());
-        }
+    public ResponseEntity<ApiResponse<Post>> create(@RequestBody CreatePostRequest request) {
+        Post post = service.create(request.title(), request.content(), request.category(), request.author());
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("게시글이 작성되었습니다.", post));
     }
 
     // 게시글 목록 조회
     @GetMapping
-    public ApiResponse<List<Post>> findAll() {
+    public ResponseEntity<ApiResponse<List<Post>>> findAll() {
 
-        return ApiResponse.success("게시글 목록을 조회했습니다.", service.findAll());
+        return ResponseEntity.ok(ApiResponse.success("게시글 목록을 조회했습니다.", service.findAll()));
     }
 
     // 게시글 단건 조회
     @GetMapping(path = "/{postId}")
-    public ApiResponse<Post> findById(@PathVariable(name = "postId") long id) {
-        try {
-            return ApiResponse.success("게시글을 조회했습니다.", service.findById(id));
-        } catch (PostNotFoundException e) {
-            return ApiResponse.failure("POST_NOT_FOUND", e.getMessage());
-        }
+    public ResponseEntity<ApiResponse<Post>> findById(@PathVariable(name = "postId") long id) {
+        return ResponseEntity.ok(ApiResponse.success("게시글을 조회했습니다.", service.getDetail(id)));
     }
 
     // 게시글 수정
     @PutMapping(path = "/{postId}")
-    public ApiResponse<Post> update(
+    public ResponseEntity<ApiResponse<Post>> update(
             @PathVariable(name = "postId") long id,
             @RequestBody UpdatePostRequest request
     ) {
-        try {
-            return ApiResponse.success("게시글이 수정되었습니다.",
-                    service.update(id, request.title(), request.content(), request.category()));
-        } catch (PostNotFoundException e) {
-            return ApiResponse.failure("POST_NOT_FOUND", e.getMessage());
-        } catch (IllegalArgumentException e) {
-            return ApiResponse.failure("INVALID_INPUT", e.getMessage());
-        }
+        Post post = service.update(id, request.title(), request.content(), request.category());
+        return ResponseEntity.ok(ApiResponse.success("게시글이 수정되었습니다.", post));
     }
 
     // 게시글 삭제
     @DeleteMapping(path = "/{postId}")
-    public ApiResponse<Void> delete(@PathVariable(name = "postId") long id) {
-        try {
-            service.delete(id);
-            return ApiResponse.success("게시글이 삭제되었습니다.", null);
-        } catch (PostNotFoundException e) {
-            return ApiResponse.failure("POST_NOT_FOUND", e.getMessage());
-        }
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable(name = "postId") long id) {
+        service.delete(id);
+        return ResponseEntity.ok(ApiResponse.success("게시글이 삭제되었습니다.", null));
     }
 }
