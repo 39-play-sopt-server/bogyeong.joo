@@ -14,24 +14,24 @@ public class InMemoryPostRepository implements PostRepository {
     private final Map<Long, Post> posts = new HashMap<>();
 
     @Override
-    public void save(Post post) {
+    public synchronized void save(Post post) {
         posts.put(post.getId(), post);
     }
 
     @Override
-    public Post findById(long id) {
+    public synchronized Post findById(long id) {
         return posts.get(id);
     }
 
     @Override
-    public List<Post> findAll() {
+    public synchronized List<Post> findAll() {
         List<Post> result = new ArrayList<>(posts.values());
         result.sort(Comparator.comparingLong(Post::getId));
         return result;
     }
 
     @Override
-    public void deleteById(long id) {
+    public synchronized void deleteById(long id) {
         posts.remove(id);
     }
 }

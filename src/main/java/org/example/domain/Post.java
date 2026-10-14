@@ -27,12 +27,12 @@ public class Post {
         this.viewCount = 0;
     }
 
-    public void increaseViewCount() {
+    public synchronized void increaseViewCount() {
         this.viewCount++;
     }
 
     // 모든 값을 먼저 검증해서 실패한 수정이 일부 필드만 바꾸지 않도록 합니다.
-    public void update(String title, String content, Category category) {
+    public synchronized void update(String title, String content, Category category) {
         validateText(title, "제목");
         validateText(content, "본문");
         validateCategory(category);
@@ -58,13 +58,13 @@ public class Post {
     public long getId() {
         return id;
     }
-    public String getTitle() {
+    public synchronized String getTitle() {
         return title;
     }
-    public String getContent() {
+    public synchronized String getContent() {
         return content;
     }
-    public Category getCategory() {
+    public synchronized Category getCategory() {
         return category;
     }
     public String getAuthor() {
@@ -73,11 +73,11 @@ public class Post {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-    public LocalDateTime getUpdatedAt() {
+    public synchronized LocalDateTime getUpdatedAt() {
         return updatedAt;
     }
 
-    public long getViewCount() {
+    public synchronized long getViewCount() {
         return viewCount;
     }
 }
