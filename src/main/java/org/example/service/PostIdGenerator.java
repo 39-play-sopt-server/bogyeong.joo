@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 public class PostIdGenerator {
     private long nextId = 1;
 
-    public long generate() {
+    public synchronized long generate() {
         return nextId++;
     }
 }
