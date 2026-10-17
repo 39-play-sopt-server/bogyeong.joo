@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 ## Description
-설명 작성
+n차 세미나 실습 구현하기.
 
 ## To - Do
 - [ ] 할 일
