@@ -1,4 +1,4 @@
-package org.example.global.domain;
+package org.example.global.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;

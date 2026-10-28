@@ -5,6 +5,8 @@ import org.example.member.service.MemberService;
 import org.example.post.domain.Category;
 import org.example.post.domain.Post;
 import org.example.post.exception.PostNotFoundException;
+import org.example.post.exception.PostErrorCode;
+import org.example.global.exception.BusinessException;
 import org.example.post.repository.PostRepository;
 import org.springframework.data.domain.PageRequest;
 import org.example.post.controller.dto.PostListResponse;
@@ -28,7 +30,7 @@ public class PostService {
     @Transactional
     public Post create(String title, String content, Category category, Long memberId) {
         if (memberId == null) {
-            throw new IllegalArgumentException("작성자 회원 ID를 입력해주세요.");
+            throw new BusinessException(PostErrorCode.AUTHOR_REQUIRED);
         }
         Post post = new Post(title, content, category, memberService.findById(memberId));
         return repository.save(post);
@@ -36,7 +38,7 @@ public class PostService {
 
     public PostListResponse findAll(String cursor, int size, Category category) {
         if (size < 1 || size > 100) {
-            throw new IllegalArgumentException("size는 1 이상 100 이하여야 합니다.");
+            throw new BusinessException(PostErrorCode.INVALID_PAGE_SIZE);
         }
 
         PostCursor position = cursor == null ? null : PostCursor.decode(cursor);
@@ -55,7 +57,7 @@ public class PostService {
     }
     public Post findById(long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new PostNotFoundException(id));
+                .orElseThrow(PostNotFoundException::new);
     }
 
     // 상세 조회에서만 조회수를 증가시키고, 수정과 삭제에서는 기존 조회를 사용

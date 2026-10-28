@@ -25,7 +25,7 @@ public class MemberService {
 
     public Member findById(long id) {
         return repository.findById(id)
-                .orElseThrow(() -> new MemberNotFoundException(id));
+                .orElseThrow(MemberNotFoundException::new);
     }
 
     @Transactional

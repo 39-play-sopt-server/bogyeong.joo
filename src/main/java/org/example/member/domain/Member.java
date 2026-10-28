@@ -1,6 +1,8 @@
 package org.example.member.domain;
 
-import org.example.global.domain.BaseEntity;
+import org.example.global.entity.BaseEntity;
+import org.example.global.exception.BusinessException;
+import org.example.member.exception.MemberErrorCode;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,13 +23,13 @@ public class Member extends BaseEntity {
     }
 
     public Member(String name) {
-        validateText(name, "이름");
+        validateName(name);
         this.name = name.trim();
     }
 
-    private void validateText(String value, String fieldName) {
+    private void validateName(String value) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + "은 비어 있을 수 없습니다.");
+            throw new BusinessException(MemberErrorCode.NAME_REQUIRED);
         }
     }
 

@@ -1,7 +1,9 @@
 package org.example.member.exception;
 
-public class MemberNotFoundException extends RuntimeException {
-    public MemberNotFoundException(long id) {
-        super("존재하지 않는 회원입니다. (ID: " + id + ")");
+import org.example.global.exception.BusinessException;
+
+public class MemberNotFoundException extends BusinessException {
+    public MemberNotFoundException() {
+        super(MemberErrorCode.MEMBER_NOT_FOUND);
     }
 }

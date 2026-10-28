@@ -1,63 +1,50 @@
 package org.example.global.exception;
 
-import org.example.post.exception.PostNotFoundException;
-import org.example.member.exception.MemberNotFoundException;
 import org.example.global.response.ApiResponse;
+import org.example.global.response.code.ErrorCode;
+import org.example.global.response.code.GlobalErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(MemberNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handleMemberNotFound(MemberNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.failure("MEMBER_NOT_FOUND", e.getMessage()));
-    }
-
-    @ExceptionHandler(PostNotFoundException.class)
-    public ResponseEntity<ApiResponse<Void>> handlePostNotFound(PostNotFoundException e) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ApiResponse.failure("POST_NOT_FOUND", e.getMessage()));
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiResponse<Void>> handleInvalidInput(IllegalArgumentException e) {
-        return ResponseEntity.badRequest()
-                .body(ApiResponse.failure("INVALID_INPUT", e.getMessage()));
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiResponse<Void>> handleInvalidBody(HttpMessageNotReadableException e) {
-        return ResponseEntity.badRequest()
-                .body(ApiResponse.failure("INVALID_INPUT", "요청 본문의 JSON 형식과 필드 값을 확인해주세요."));
-    }
-
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<ApiResponse<Void>> handleTypeMismatch(MethodArgumentTypeMismatchException e) {
-        return ResponseEntity.badRequest()
-                .body(ApiResponse.failure("INVALID_INPUT", "요청한 값의 타입이 올바르지 않습니다."));
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBusinessException(BusinessException e) {
+        ErrorCode code = e.getErrorCode();
+        return ResponseEntity.status(code.getStatus()).body(ApiResponse.failure(code));
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleException(Exception e) {
-        // Spring이 정한 404, 405, 415 등의 상태코드는 유지합니다.
-        if (e instanceof ErrorResponse errorResponse) {
-            return ResponseEntity.status(errorResponse.getStatusCode())
-                    .headers(errorResponse.getHeaders())
-                    .body(ApiResponse.failure("REQUEST_ERROR", "요청 경로, HTTP 메서드와 Content-Type을 확인해주세요."));
-        }
-
+    public ResponseEntity<ApiResponse<Void>> handleUnexpectedException(Exception e) {
         log.error("요청 처리 중 예상하지 못한 오류가 발생했습니다.", e);
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.failure("INTERNAL_SERVER_ERROR", "서버 오류가 발생했습니다."));
+        ErrorCode code = GlobalErrorCode.INTERNAL_SERVER_ERROR;
+        return ResponseEntity.status(code.getStatus()).body(ApiResponse.failure(code));
+    }
+
+    // Spring MVC가 정한 상태와 Allow 등 응답 헤더는 유지하고 본문만 공통 형식으로 바꿉니다.
+    @Override
+    protected ResponseEntity<Object> handleExceptionInternal(
+            Exception e, Object body, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        GlobalErrorCode code = switch (status.value()) {
+            case 404 -> GlobalErrorCode.RESOURCE_NOT_FOUND;
+            case 405 -> GlobalErrorCode.METHOD_NOT_ALLOWED;
+            case 406 -> GlobalErrorCode.NOT_ACCEPTABLE;
+            case 415 -> GlobalErrorCode.UNSUPPORTED_MEDIA_TYPE;
+            default -> status.is5xxServerError()
+                    ? GlobalErrorCode.INTERNAL_SERVER_ERROR : GlobalErrorCode.INVALID_REQUEST;
+        };
+        if (status.is5xxServerError()) {
+            log.error("Spring MVC 요청 처리 중 오류가 발생했습니다.", e);
+        }
+        return super.handleExceptionInternal(e, ApiResponse.failure(code), headers, status, request);
     }
 }

@@ -16,6 +16,7 @@ import java.util.List;
 import org.example.member.controller.MemberController;
 import org.example.post.controller.PostController;
 import org.example.global.exception.GlobalExceptionHandler;
+import org.example.global.exception.BusinessException;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -87,6 +88,7 @@ class PostServiceIntegrationTest {
         mvc.perform(post("/api/v1/members")
                         .contentType("application/json").content("{\"name\":\"작성자\"}"))
                 .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.code").value("MEMBER_CREATED"))
                 .andExpect(jsonPath("$.data.name").value("작성자"));
 
         Post post = service.create("제목", "본문", Category.DAILY, memberId);
@@ -97,7 +99,7 @@ class PostServiceIntegrationTest {
                 .andExpect(jsonPath("$.data.nextCursor").isEmpty());
         mvc.perform(get("/api/v1/posts").param("cursor", "invalid"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
+                .andExpect(jsonPath("$.code").value("INVALID_CURSOR"));
         mvc.perform(get("/api/v1/posts/" + post.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("작성자"))
@@ -107,6 +109,28 @@ class PostServiceIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true));
         assertFalse(repository.existsById(post.getId()));
+    }
+
+    @Test
+    void postApiUsesOperationCodesAndDomainValidationCodes() throws Exception {
+        var mvc = MockMvcBuilders.standaloneSetup(new PostController(service), new MemberController(memberService))
+                .setControllerAdvice(new GlobalExceptionHandler()).build();
+        String body = "{\"title\":\"제목\",\"content\":\"본문\",\"category\":\"DAILY\",\"memberId\":" + memberId + "}";
+        var response = mvc.perform(post("/api/v1/posts").contentType("application/json").content(body))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.code").value("POST_CREATED"))
+                .andReturn().getResponse().getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
+        Number id = com.jayway.jsonpath.JsonPath.read(response, "$.data.id");
+        mvc.perform(get("/api/v1/posts/" + id.longValue()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.code").value("POST_FOUND"));
+        mvc.perform(put("/api/v1/posts/" + id.longValue()).contentType("application/json").content(body))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.code").value("POST_UPDATED"));
+        mvc.perform(delete("/api/v1/posts/" + id.longValue()))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.code").value("POST_DELETED"));
+        mvc.perform(post("/api/v1/posts").contentType("application/json").content(body.replace("제목", " ")))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("TITLE_REQUIRED"));
+        mvc.perform(post("/api/v1/members").contentType("application/json").content("{\"name\":\" \"}"))
+                .andExpect(status().isBadRequest()).andExpect(jsonPath("$.code").value("NAME_REQUIRED"));
     }
 
     @Test
@@ -135,7 +159,7 @@ class PostServiceIntegrationTest {
     void postRequiresExistingMemberAndReturnsNameOutsideTransaction() {
         assertThrows(MemberNotFoundException.class,
                 () -> service.create("제목", "본문", Category.DAILY, -1L));
-        assertThrows(IllegalArgumentException.class,
+        assertThrows(BusinessException.class,
                 () -> service.create("제목", "본문", Category.DAILY, null));
         Post post = service.create("제목", "본문", Category.DAILY, memberId);
         assertEquals("작성자", service.getDetail(post.getId()).getName());
@@ -228,10 +252,10 @@ class PostServiceIntegrationTest {
         assertTrue(service.findAll(null, 10, null).posts().isEmpty());
         assertFalse(service.findAll(null, 10, null).hasNext());
         assertNull(service.findAll(null, 10, null).nextCursor());
-        assertThrows(IllegalArgumentException.class, () -> service.findAll("invalid", 10, null));
-        assertThrows(IllegalArgumentException.class, () -> service.findAll("", 10, null));
-        assertThrows(IllegalArgumentException.class, () -> service.findAll(null, 0, null));
-        assertThrows(IllegalArgumentException.class, () -> service.findAll(null, 101, null));
+        assertThrows(BusinessException.class, () -> service.findAll("invalid", 10, null));
+        assertThrows(BusinessException.class, () -> service.findAll("", 10, null));
+        assertThrows(BusinessException.class, () -> service.findAll(null, 0, null));
+        assertThrows(BusinessException.class, () -> service.findAll(null, 101, null));
     }
     @Test
     void deleteRemovesPostFromDatabase() {

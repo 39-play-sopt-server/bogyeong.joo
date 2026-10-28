@@ -1,5 +1,8 @@
 package org.example.post.service;
 
+import org.example.global.exception.BusinessException;
+import org.example.post.exception.PostErrorCode;
+
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
@@ -25,7 +28,7 @@ record PostCursor(LocalDateTime createdAt, long id) {
             }
             return new PostCursor(LocalDateTime.parse(parts[0]), id);
         } catch (IllegalArgumentException | DateTimeParseException e) {
-            throw new IllegalArgumentException("올바르지 않은 게시글 커서입니다.");
+            throw new BusinessException(PostErrorCode.INVALID_CURSOR);
         }
     }
 }

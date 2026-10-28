@@ -1,7 +1,9 @@
 package org.example.post.domain;
 
 import org.example.member.domain.Member;
-import org.example.global.domain.BaseEntity;
+import org.example.global.exception.BusinessException;
+import org.example.post.exception.PostErrorCode;
+import org.example.global.entity.BaseEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -38,10 +40,10 @@ public class Post extends BaseEntity {
     }
 
     public Post(String title, String content, Category category, Member member) {
-        validateText(title, "제목");
-        validateText(content, "본문");
+        validateText(title, PostErrorCode.TITLE_REQUIRED);
+        validateText(content, PostErrorCode.CONTENT_REQUIRED);
         if (member == null) {
-            throw new IllegalArgumentException("작성자를 선택해주세요.");
+            throw new BusinessException(PostErrorCode.AUTHOR_REQUIRED);
         }
         validateCategory(category);
         this.title = title.trim();
@@ -58,8 +60,8 @@ public class Post extends BaseEntity {
 
     // 모든 값을 먼저 검증해서 실패한 수정이 일부 필드만 바꾸지 않도록 합니다.
     public synchronized void update(String title, String content, Category category) {
-        validateText(title, "제목");
-        validateText(content, "본문");
+        validateText(title, PostErrorCode.TITLE_REQUIRED);
+        validateText(content, PostErrorCode.CONTENT_REQUIRED);
         validateCategory(category);
 
         this.title = title.trim();
@@ -70,13 +72,13 @@ public class Post extends BaseEntity {
 
     private void validateCategory(Category category) {
         if (category == null) {
-            throw new IllegalArgumentException("카테고리를 선택해주세요.");
+            throw new BusinessException(PostErrorCode.CATEGORY_REQUIRED);
         }
     }
 
-    private void validateText(String value, String fieldName) {
+    private void validateText(String value, PostErrorCode errorCode) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(fieldName + "은 비어 있을 수 없습니다.");
+            throw new BusinessException(errorCode);
         }
     }
 

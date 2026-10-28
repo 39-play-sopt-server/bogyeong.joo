@@ -1,7 +1,9 @@
 package org.example.post.exception;
 
-public class PostNotFoundException extends RuntimeException {
-    public PostNotFoundException(long id) {
-        super("존재하지 않는 게시글입니다. (ID: " + id + ")");
+import org.example.global.exception.BusinessException;
+
+public class PostNotFoundException extends BusinessException {
+    public PostNotFoundException() {
+        super(PostErrorCode.POST_NOT_FOUND);
     }
 }
