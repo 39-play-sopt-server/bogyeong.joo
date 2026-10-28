@@ -1,7 +1,7 @@
 package org.example.post.repository;
 
 import jakarta.persistence.criteria.Predicate;
-import org.example.post.entity.Category;
+import org.example.post.entity.enums.Category;
 import org.example.post.entity.Post;
 import org.springframework.data.jpa.domain.Specification;
 

@@ -2,7 +2,7 @@ package org.example.post.service;
 
 import org.example.member.service.MemberService;
 
-import org.example.post.entity.Category;
+import org.example.post.entity.enums.Category;
 import org.example.post.entity.Post;
 import org.example.post.exception.PostNotFoundException;
 import org.example.post.exception.PostErrorCode;

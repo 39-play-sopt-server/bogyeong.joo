@@ -23,8 +23,7 @@ public interface MemberControllerDocs {
     @Operation(
             summary = "회원 생성",
             description = """
-            이름을 받아 회원을 생성합니다.<br>
-            동명이인을 허용하며 응답의 회원 ID로 게시글 작성자를 지정합니다.
+            이름을 받아 회원을 생성합니다.
             """)
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "201",
@@ -47,8 +46,7 @@ public interface MemberControllerDocs {
     @Operation(
             summary = "회원 삭제",
             description = """
-            회원과 해당 회원이 작성한 게시글을 하나의 트랜잭션에서 함께 삭제합니다.<br>
-            같은 이름의 다른 회원과 그 게시글은 삭제하지 않습니다.
+            회원과 해당 회원이 작성한 게시글을 함께 삭제합니다.
             """)
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",

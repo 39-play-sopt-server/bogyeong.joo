@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.example.post.controller.dto.CreatePostRequest;
 import org.example.post.controller.dto.UpdatePostRequest;
 import org.example.post.controller.dto.PostListResponse;
-import org.example.post.entity.Category;
+import org.example.post.entity.enums.Category;
 import org.example.post.entity.Post;
 import java.util.List;
 
@@ -27,8 +27,7 @@ public interface PostControllerDocs {
     @Operation(
             summary = "게시글 작성",
             description = """
-            제목, 본문, 카테고리와 기존 회원 ID를 받아 게시글을 작성합니다.<br>
-            응답에 작성자 이름(name, author)을 포함합니다.
+            제목, 본문, 카테고리와 기존 회원 ID를 받아 게시글을 작성합니다.
             """)
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "201",
@@ -56,9 +55,7 @@ public interface PostControllerDocs {
     @Operation(
             summary = "게시글 목록 조회",
             description = """
-            생성일 최신순으로 조회하고, 같은 생성일이면 ID 내림차순으로 정렬합니다.<br>
-            첫 요청은 cursor를 생략하고 다음 요청에는 nextCursor를 전달합니다.<br>
-            hasNext=false면 조회를 중단하며 카테고리를 바꾸면 cursor를 생략해 다시 시작합니다.
+            계시글 목록을 반환합니다.
             """)
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
@@ -97,11 +94,7 @@ public interface PostControllerDocs {
     @Operation(
             summary = "게시글 검색",
             description = """
-            keyword(제목 LIKE), memberId(작성자 ID), category 조건을 선택적으로 전달합니다.<br>
-            전달한 조건만 동적 쿼리로 구성하며 여러 조건은 AND로 결합합니다. 모두 생략하면 전체 게시글을 반환합니다.<br>
-            검색어 앞뒤 공백은 제거하며 공백만 입력할 수 없습니다.<br>
-            %, _는 실제 문자로 검색하며 검색 결과는 생성일·ID 내림차순으로 반환합니다.<br>
-            일치하는 게시글이 없으면 빈 목록을 반환하고 조회수는 증가하지 않습니다.
+            게시글을 검색합니다.
             """)
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200", description = "검색 성공: POST_SEARCHED. data에 일치하는 게시글 목록 반환",
@@ -113,10 +106,11 @@ public interface PostControllerDocs {
             @Parameter(description = "제목에 포함된 검색어. 생략하면 제목 조건 제외", example = "세미나") String keyword,
             @Parameter(description = "작성자 회원 ID. 생략하면 작성자 조건 제외", example = "1") Long memberId,
             @Parameter(description = "카테고리. 생략하면 카테고리 조건 제외", example = "DAILY") Category category);
+
     // 게시글 단건 조회
     @Operation(
             summary = "게시글 상세 조회",
-            description = "게시글과 작성자 이름(name, author)을 반환하며 조회수를 1 증가시킵니다.")
+            description = "게시글을 조회합니다.")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
             description = "상세 조회 성공: POST_FOUND",
@@ -140,9 +134,7 @@ public interface PostControllerDocs {
     @Operation(
             summary = "게시글 수정",
             description = """
-            제목, 본문, 카테고리를 모두 전달해 수정합니다.<br>
-            작성자와 생성일은 유지하고 수정일을 기록합니다.<br>
-            조회수는 증가하지 않습니다.
+            제목, 본문, 카테고리를 모두 전달해 수정합니다.
             """)
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
@@ -171,8 +163,7 @@ public interface PostControllerDocs {
     @Operation(
             summary = "게시글 삭제",
             description = """
-            게시글을 삭제합니다.<br>
-            작성자 회원은 삭제하지 않으며 조회수도 증가하지 않습니다.
+            게시글을 삭제합니다.
             """)
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",

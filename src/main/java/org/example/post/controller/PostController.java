@@ -2,7 +2,7 @@ package org.example.post.controller;
 
 import org.example.post.controller.dto.CreatePostRequest;
 import org.example.post.controller.dto.UpdatePostRequest;
-import org.example.post.entity.Category;
+import org.example.post.entity.enums.Category;
 import org.example.post.entity.Post;
 import org.example.post.controller.docs.PostControllerDocs;
 import org.example.global.response.ApiResponse;
