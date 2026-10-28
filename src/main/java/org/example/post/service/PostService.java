@@ -36,14 +36,14 @@ public class PostService {
         return repository.save(post);
     }
 
-    public PostListResponse findAll(String cursor, int size, Category category) {
+    public PostListResponse findAll(String cursor, int size, Category category, String title) {
         if (size < 1 || size > 100) {
             throw new BusinessException(PostErrorCode.INVALID_PAGE_SIZE);
         }
 
         PostCursor position = cursor == null ? null : PostCursor.decode(cursor);
         // 한 개를 더 조회해서 전체 개수 조회 없이 다음 목록의 존재 여부를 확인합니다.
-        List<Post> fetched = repository.findNextPosts(category,
+        List<Post> fetched = repository.findNextPosts(category, toTitlePattern(title),
                 position == null ? null : position.createdAt(),
                 position == null ? null : position.id(), PageRequest.of(0, size + 1));
         boolean hasNext = fetched.size() > size;
@@ -55,6 +55,16 @@ public class PostService {
         }
         return new PostListResponse(posts, nextCursor, hasNext);
     }
+
+    private String toTitlePattern(String title) {
+        if (title == null || title.isBlank()) {
+            return null;
+        }
+        // 검색어의 %, _는 와일드카드가 아닌 실제 문자로 검색합니다.
+        String escaped = title.trim().replace("!", "!!").replace("%", "!%").replace("_", "!_");
+        return "%" + escaped + "%";
+    }
+
     public Post findById(long id) {
         return repository.findById(id)
                 .orElseThrow(PostNotFoundException::new);

@@ -56,8 +56,11 @@ public interface PostControllerDocs {
             summary = "게시글 목록 조회",
             description = """
             생성일 최신순으로 조회하고, 같은 생성일이면 ID 내림차순으로 정렬합니다.<br>
+            title을 전달하면 제목에 해당 문자열이 포함된 게시글을 LIKE로 검색합니다.<br>
+            검색어 앞뒤 공백은 제거하며 생략하거나 공백만 전달하면 제목 조건을 적용하지 않습니다.<br>
+            검색어의 %, _는 실제 문자로 검색하며 카테고리 조건과 함께 사용할 수 있습니다.<br>
             첫 요청은 cursor를 생략하고 다음 요청에는 nextCursor를 전달합니다.<br>
-            hasNext=false면 조회를 중단하며 카테고리를 바꾸면 cursor를 생략해 다시 시작합니다.
+            hasNext=false면 조회를 중단하며 검색어나 카테고리를 바꾸면 cursor를 생략해 다시 시작합니다.
             """)
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
@@ -89,7 +92,8 @@ public interface PostControllerDocs {
             @Parameter(name = "category", description = """
             생략하면 전체 카테고리 조회.<br>
             DAILY(일상), QUESTION(질문), INFORMATION(정보)
-            """, example = "DAILY") Category category
+            """, example = "DAILY") Category category,
+            @Parameter(name = "title", description = "제목 부분 일치 검색어. 생략하거나 공백만 전달하면 전체 제목 조회", example = "세미나") String title
     );
 
     // 게시글 단건 조회

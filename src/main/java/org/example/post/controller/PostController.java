@@ -36,9 +36,10 @@ public class PostController implements PostControllerDocs {
     public ResponseEntity<ApiResponse<PostListResponse>> findAll(
             @RequestParam(name = "cursor", required = false) String cursor,
             @RequestParam(name = "size", defaultValue = "10") int size,
-            @RequestParam(name = "category", required = false) Category category
+            @RequestParam(name = "category", required = false) Category category,
+            @RequestParam(name = "title", required = false) String title
     ) {
-        return ApiResponse.toResponseEntity(PostSuccessCode.POST_LIST_FOUND, service.findAll(cursor, size, category));
+        return ApiResponse.toResponseEntity(PostSuccessCode.POST_LIST_FOUND, service.findAll(cursor, size, category, title));
     }
 
     // 게시글 단건 조회

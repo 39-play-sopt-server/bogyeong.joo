@@ -46,6 +46,15 @@
 - ApiResponse와 PostListResponse에도 필드 설명을 추가했습니다. nextCursor=null과 hasNext=false의 의미를 문서화합니다.
 - Swagger UI는 /swagger-ui/index.html, OpenAPI JSON은 /v3/api-docs에서 확인할 수 있습니다.
 
+## 게시글 제목 검색
+
+- GET /api/v1/posts?title=세미나 로 제목에 '세미나'가 포함된 게시글을 조회합니다. JPQL LIKE로 부분 일치를 검색합니다.
+- title은 선택 파라미터입니다. 앞뒤 공백을 제거하고, 생략하거나 공백만 전달하면 제목 조건을 적용하지 않습니다.
+- %, _는 와일드카드로 확장하지 않고 실제 문자로 검색합니다. 대소문자 구분은 DB의 collation 설정에 따릅니다.
+- category, size, cursor와 함께 사용할 수 있습니다. 검색어나 카테고리를 바꾸면 cursor를 생략해 첫 목록부터 조회합니다.
+- 응답 구조와 POST_LIST_FOUND 코드는 기존 목록 조회와 같습니다. 일치하는 글이 없으면 posts=[], nextCursor=null, hasNext=false입니다.
+- 검색 시 조회수는 증가하지 않습니다. LIKE 앞뒤에 %를 붙이므로 일반 B-tree 인덱스로 검색 범위를 효율적으로 좁히기 어렵고, 이번 변경에는 검색 인덱스 최적화를 포함하지 않습니다.
+
 ## 기존 응답과 달라진 점
 
 - 공통 성공 코드 SUCCESS를 작업별 성공 코드로 변경했습니다.

@@ -16,12 +16,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("""
             SELECT p FROM Post p
             WHERE (:category IS NULL OR p.category = :category)
+              AND (:titlePattern IS NULL OR p.title LIKE :titlePattern ESCAPE '!')
               AND (:createdAt IS NULL OR p.createdAt < :createdAt
                    OR (p.createdAt = :createdAt AND p.id < :id))
             ORDER BY p.createdAt DESC, p.id DESC
             """)
     List<Post> findNextPosts(
             @Param("category") Category category,
+            @Param("titlePattern") String titlePattern,
             @Param("createdAt") LocalDateTime createdAt,
             @Param("id") Long id,
             Pageable pageable);

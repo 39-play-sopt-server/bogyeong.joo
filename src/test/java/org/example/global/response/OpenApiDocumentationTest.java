@@ -42,7 +42,7 @@ class OpenApiDocumentationTest {
             Map<String, Object> notFound = document.read("$.paths['/api/v1/posts'].post.responses['404'].content['application/json']");
             assertTrue(notFound.toString().contains("MEMBER_NOT_FOUND"));
             List<Map<String, Object>> parameters = document.read("$.paths['/api/v1/posts'].get.parameters");
-            assertEquals(3, parameters.size());
+            assertEquals(4, parameters.size());
             assertTrue(parameters.stream().anyMatch(p -> "size".equals(p.get("name"))
                     && p.get("schema").toString().contains("maximum=100")));
             assertEquals("보경", document.read("$.components.schemas.CreateMemberRequest.properties.name.example"));

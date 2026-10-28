@@ -163,7 +163,7 @@ class PostServiceIntegrationTest {
                 () -> service.create("제목", "본문", Category.DAILY, null));
         Post post = service.create("제목", "본문", Category.DAILY, memberId);
         assertEquals("작성자", service.getDetail(post.getId()).getName());
-        assertEquals("작성자", service.findAll(null, 10, null).posts().getFirst().getName());
+        assertEquals("작성자", service.findAll(null, 10, null, null).posts().getFirst().getName());
     }
 
     @Test
@@ -200,7 +200,7 @@ class PostServiceIntegrationTest {
         Post created = service.create("제목", "본문", Category.DAILY, memberId);
 
         service.findById(created.getId());
-        service.findAll(null, 10, null);
+        service.findAll(null, 10, null, null);
         assertEquals(0, repository.findById(created.getId()).orElseThrow().getViewCount());
 
         service.getDetail(created.getId());
@@ -215,13 +215,13 @@ class PostServiceIntegrationTest {
         service.create("질문", "본문", Category.QUESTION, memberId);
         Post third = service.create("다음 글", "본문", Category.DAILY, memberId);
 
-        var page = service.findAll(null, 1, Category.DAILY);
+        var page = service.findAll(null, 1, Category.DAILY, null);
         assertEquals(List.of(third.getId()), page.posts().stream().map(Post::getId).toList());
         assertTrue(page.hasNext());
         service.delete(third.getId());
         service.create("새 글", "본문", Category.DAILY, memberId);
 
-        var next = service.findAll(page.nextCursor(), 1, Category.DAILY);
+        var next = service.findAll(page.nextCursor(), 1, Category.DAILY, null);
         assertEquals(List.of(first.getId()), next.posts().stream().map(Post::getId).toList());
         assertFalse(next.hasNext());
         assertNull(next.nextCursor());
@@ -237,25 +237,66 @@ class PostServiceIntegrationTest {
         jdbc.update("UPDATE post SET created_at = ? WHERE id = ?", time, second.getId());
         jdbc.update("UPDATE post SET created_at = ? WHERE id = ?", time.minusDays(1), third.getId());
 
-        var page = service.findAll(null, 1, null);
+        var page = service.findAll(null, 1, null, null);
         assertEquals(second.getId(), page.posts().getFirst().getId());
-        var next = service.findAll(page.nextCursor(), 1, null);
+        var next = service.findAll(page.nextCursor(), 1, null, null);
         assertEquals(first.getId(), next.posts().getFirst().getId());
-        var last = service.findAll(next.nextCursor(), 1, null);
+        var last = service.findAll(next.nextCursor(), 1, null, null);
         assertEquals(third.getId(), last.posts().getFirst().getId());
         assertFalse(last.hasNext());
         assertNull(last.nextCursor());
     }
 
     @Test
+    void titleSearchCombinesCategoryAndCursorAndDoesNotSearchContent() throws Exception {
+        Post first = service.create("첫 세미나 후기", "본문", Category.DAILY, memberId);
+        Post second = service.create("다음 세미나 후기", "본문", Category.DAILY, memberId);
+        service.create("세미나 질문", "본문", Category.QUESTION, memberId);
+        service.create("다른 제목", "세미나 후기", Category.DAILY, memberId);
+
+        var page = service.findAll(null, 1, Category.DAILY, " 세미나 ");
+        assertEquals(List.of(second.getId()), page.posts().stream().map(Post::getId).toList());
+        assertTrue(page.hasNext());
+        var next = service.findAll(page.nextCursor(), 1, Category.DAILY, "세미나");
+        assertEquals(List.of(first.getId()), next.posts().stream().map(Post::getId).toList());
+        assertFalse(next.hasNext());
+        assertEquals(0, service.findById(first.getId()).getViewCount());
+
+        var mvc = MockMvcBuilders.standaloneSetup(new PostController(service))
+                .setControllerAdvice(new GlobalExceptionHandler()).build();
+        mvc.perform(get("/api/v1/posts").param("title", "세미나").param("category", "DAILY").param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("POST_LIST_FOUND"))
+                .andExpect(jsonPath("$.data.posts[0].title").value("다음 세미나 후기"))
+                .andExpect(jsonPath("$.data.hasNext").value(true));
+    }
+
+    @Test
+    void titleSearchHandlesBlankNoMatchesAndLiteralWildcards() {
+        Post percent = service.create("100% 완료", "본문", Category.DAILY, memberId);
+        Post underscore = service.create("제목_표시", "본문", Category.DAILY, memberId);
+        Post escape = service.create("느낌!표", "본문", Category.DAILY, memberId);
+        service.create("100점 완료", "본문", Category.DAILY, memberId);
+
+        assertEquals(List.of(percent.getId()), service.findAll(null, 10, null, "%").posts().stream().map(Post::getId).toList());
+        assertEquals(List.of(underscore.getId()), service.findAll(null, 10, null, "_").posts().stream().map(Post::getId).toList());
+        assertEquals(List.of(escape.getId()), service.findAll(null, 10, null, "!").posts().stream().map(Post::getId).toList());
+        assertEquals(4, service.findAll(null, 10, null, "   ").posts().size());
+        var empty = service.findAll(null, 10, null, "없는 검색어");
+        assertTrue(empty.posts().isEmpty());
+        assertFalse(empty.hasNext());
+        assertNull(empty.nextCursor());
+    }
+
+    @Test
     void cursorValidatesInputAndHandlesEmptyList() {
-        assertTrue(service.findAll(null, 10, null).posts().isEmpty());
-        assertFalse(service.findAll(null, 10, null).hasNext());
-        assertNull(service.findAll(null, 10, null).nextCursor());
-        assertThrows(BusinessException.class, () -> service.findAll("invalid", 10, null));
-        assertThrows(BusinessException.class, () -> service.findAll("", 10, null));
-        assertThrows(BusinessException.class, () -> service.findAll(null, 0, null));
-        assertThrows(BusinessException.class, () -> service.findAll(null, 101, null));
+        assertTrue(service.findAll(null, 10, null, null).posts().isEmpty());
+        assertFalse(service.findAll(null, 10, null, null).hasNext());
+        assertNull(service.findAll(null, 10, null, null).nextCursor());
+        assertThrows(BusinessException.class, () -> service.findAll("invalid", 10, null, null));
+        assertThrows(BusinessException.class, () -> service.findAll("", 10, null, null));
+        assertThrows(BusinessException.class, () -> service.findAll(null, 0, null, null));
+        assertThrows(BusinessException.class, () -> service.findAll(null, 101, null, null));
     }
     @Test
     void deleteRemovesPostFromDatabase() {
