@@ -11,8 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.example.post.controller.dto.CreatePostRequest;
 import org.example.post.controller.dto.UpdatePostRequest;
 import org.example.post.controller.dto.PostListResponse;
-import org.example.post.domain.Category;
-import org.example.post.domain.Post;
+import org.example.post.entity.Category;
+import org.example.post.entity.Post;
+import java.util.List;
 
 @Tag(name = "Post", description = "게시글 생성·조회·수정·삭제 API")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -56,11 +57,8 @@ public interface PostControllerDocs {
             summary = "게시글 목록 조회",
             description = """
             생성일 최신순으로 조회하고, 같은 생성일이면 ID 내림차순으로 정렬합니다.<br>
-            title을 전달하면 제목에 해당 문자열이 포함된 게시글을 LIKE로 검색합니다.<br>
-            검색어 앞뒤 공백은 제거하며 생략하거나 공백만 전달하면 제목 조건을 적용하지 않습니다.<br>
-            검색어의 %, _는 실제 문자로 검색하며 카테고리 조건과 함께 사용할 수 있습니다.<br>
             첫 요청은 cursor를 생략하고 다음 요청에는 nextCursor를 전달합니다.<br>
-            hasNext=false면 조회를 중단하며 검색어나 카테고리를 바꾸면 cursor를 생략해 다시 시작합니다.
+            hasNext=false면 조회를 중단하며 카테고리를 바꾸면 cursor를 생략해 다시 시작합니다.
             """)
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "200",
@@ -92,10 +90,29 @@ public interface PostControllerDocs {
             @Parameter(name = "category", description = """
             생략하면 전체 카테고리 조회.<br>
             DAILY(일상), QUESTION(질문), INFORMATION(정보)
-            """, example = "DAILY") Category category,
-            @Parameter(name = "title", description = "제목 부분 일치 검색어. 생략하거나 공백만 전달하면 전체 제목 조회", example = "세미나") String title
+            """, example = "DAILY") Category category
     );
 
+    // 게시글 검색
+    @Operation(
+            summary = "게시글 검색",
+            description = """
+            keyword(제목 LIKE), memberId(작성자 ID), category 조건을 선택적으로 전달합니다.<br>
+            전달한 조건만 동적 쿼리로 구성하며 여러 조건은 AND로 결합합니다. 모두 생략하면 전체 게시글을 반환합니다.<br>
+            검색어 앞뒤 공백은 제거하며 공백만 입력할 수 없습니다.<br>
+            %, _는 실제 문자로 검색하며 검색 결과는 생성일·ID 내림차순으로 반환합니다.<br>
+            일치하는 게시글이 없으면 빈 목록을 반환하고 조회수는 증가하지 않습니다.
+            """)
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "200", description = "검색 성공: POST_SEARCHED. data에 일치하는 게시글 목록 반환",
+            useReturnTypeSchema = true)
+    @io.swagger.v3.oas.annotations.responses.ApiResponse(
+            responseCode = "400", description = "공백 검색어: SEARCH_KEYWORD_REQUIRED / 회원 ID 타입·카테고리 값 오류: INVALID_REQUEST",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
+    ResponseEntity<ApiResponse<List<Post>>> search(
+            @Parameter(description = "제목에 포함된 검색어. 생략하면 제목 조건 제외", example = "세미나") String keyword,
+            @Parameter(description = "작성자 회원 ID. 생략하면 작성자 조건 제외", example = "1") Long memberId,
+            @Parameter(description = "카테고리. 생략하면 카테고리 조건 제외", example = "DAILY") Category category);
     // 게시글 단건 조회
     @Operation(
             summary = "게시글 상세 조회",

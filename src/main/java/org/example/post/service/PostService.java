@@ -2,12 +2,14 @@ package org.example.post.service;
 
 import org.example.member.service.MemberService;
 
-import org.example.post.domain.Category;
-import org.example.post.domain.Post;
+import org.example.post.entity.Category;
+import org.example.post.entity.Post;
 import org.example.post.exception.PostNotFoundException;
 import org.example.post.exception.PostErrorCode;
 import org.example.global.exception.BusinessException;
 import org.example.post.repository.PostRepository;
+import org.example.post.repository.PostSpecification;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
 import org.example.post.controller.dto.PostListResponse;
 import org.springframework.stereotype.Service;
@@ -36,14 +38,13 @@ public class PostService {
         return repository.save(post);
     }
 
-    public PostListResponse findAll(String cursor, int size, Category category, String title) {
+    public PostListResponse findAll(String cursor, int size, Category category) {
         if (size < 1 || size > 100) {
             throw new BusinessException(PostErrorCode.INVALID_PAGE_SIZE);
         }
 
         PostCursor position = cursor == null ? null : PostCursor.decode(cursor);
-        // 한 개를 더 조회해서 전체 개수 조회 없이 다음 목록의 존재 여부를 확인합니다.
-        List<Post> fetched = repository.findNextPosts(category, toTitlePattern(title),
+        List<Post> fetched = repository.findNextPosts(category,
                 position == null ? null : position.createdAt(),
                 position == null ? null : position.id(), PageRequest.of(0, size + 1));
         boolean hasNext = fetched.size() > size;
@@ -56,21 +57,18 @@ public class PostService {
         return new PostListResponse(posts, nextCursor, hasNext);
     }
 
-    private String toTitlePattern(String title) {
-        if (title == null || title.isBlank()) {
-            return null;
+    public List<Post> search(String keyword, Long memberId, Category category) {
+        if (keyword != null && keyword.isBlank()) {
+            throw new BusinessException(PostErrorCode.SEARCH_KEYWORD_REQUIRED);
         }
-        // 검색어의 %, _는 와일드카드가 아닌 실제 문자로 검색합니다.
-        String escaped = title.trim().replace("!", "!!").replace("%", "!%").replace("_", "!_");
-        return "%" + escaped + "%";
+        return repository.findAll(PostSpecification.search(keyword, memberId, category),
+                Sort.by(Sort.Direction.DESC, "createdAt", "id"));
     }
-
     public Post findById(long id) {
         return repository.findById(id)
                 .orElseThrow(PostNotFoundException::new);
     }
 
-    // 상세 조회에서만 조회수를 증가시키고, 수정과 삭제에서는 기존 조회를 사용
     @Transactional
     public Post getDetail(long id) {
         Post post = findById(id);

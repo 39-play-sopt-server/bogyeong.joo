@@ -46,15 +46,18 @@
 - ApiResponse와 PostListResponse에도 필드 설명을 추가했습니다. nextCursor=null과 hasNext=false의 의미를 문서화합니다.
 - Swagger UI는 /swagger-ui/index.html, OpenAPI JSON은 /v3/api-docs에서 확인할 수 있습니다.
 
-## 게시글 제목 검색
+## 게시글 동적 검색
 
-- GET /api/v1/posts?title=세미나 로 제목에 '세미나'가 포함된 게시글을 조회합니다. JPQL LIKE로 부분 일치를 검색합니다.
-- title은 선택 파라미터입니다. 앞뒤 공백을 제거하고, 생략하거나 공백만 전달하면 제목 조건을 적용하지 않습니다.
-- %, _는 와일드카드로 확장하지 않고 실제 문자로 검색합니다. 대소문자 구분은 DB의 collation 설정에 따릅니다.
-- category, size, cursor와 함께 사용할 수 있습니다. 검색어나 카테고리를 바꾸면 cursor를 생략해 첫 목록부터 조회합니다.
-- 응답 구조와 POST_LIST_FOUND 코드는 기존 목록 조회와 같습니다. 일치하는 글이 없으면 posts=[], nextCursor=null, hasNext=false입니다.
-- 검색 시 조회수는 증가하지 않습니다. LIKE 앞뒤에 %를 붙이므로 일반 B-tree 인덱스로 검색 범위를 효율적으로 좁히기 어렵고, 이번 변경에는 검색 인덱스 최적화를 포함하지 않습니다.
-
+- GET /api/v1/posts/search?memberId=1&category=DAILY 로 특정 작성자의 일상 게시글을 검색합니다.
+- keyword(제목 부분 일치), memberId(작성자 ID), category는 모두 선택 파라미터입니다. 여러 조건을 전달하면 AND로 결합하며, 모두 생략하면 전체 게시글을 반환합니다.
+- 예: /api/v1/posts/search?keyword=세미나&memberId=1&category=DAILY
+- Spring Data JPA의 JpaSpecificationExecutor와 PostSpecification을 사용합니다. 값이 있는 조건만 Predicate에 추가하므로 null 여부를 OR로 검사하는 고정 쿼리와 다릅니다.
+- 제목은 LIKE 부분 일치를 유지합니다. 앞뒤 공백을 제거하고 %, _는 실제 문자로 검색합니다. keyword를 생략하면 제목 조건을 제외하고, 공백만 전달하면 400 SEARCH_KEYWORD_REQUIRED입니다.
+- memberId는 이름이 아닌 회원 ID로 비교하므로 동명이인도 구분합니다. 조건에 맞는 게시글이 없거나 존재하지 않는 회원 ID이면 빈 배열을 반환합니다.
+- 회원 ID 타입·카테고리 값이 잘못되면 400 INVALID_REQUEST입니다.
+- 응답은 POST_SEARCHED 코드와 data의 게시글 목록입니다. 생성일·ID 내림차순이며 검색은 조회수를 증가시키지 않습니다. 작성자도 함께 조회해 응답의 이름을 사용할 수 있도록 합니다.
+- 기존 GET /api/v1/posts의 카테고리·커서 목록 조회는 유지합니다. 검색 API에는 페이지네이션과 검색 인덱스 최적화를 포함하지 않습니다.
+- 참고: [Spring Data JPA - Specification](https://docs.spring.io/spring-data/jpa/reference/jpa/specifications.html)
 ## 기존 응답과 달라진 점
 
 - 공통 성공 코드 SUCCESS를 작업별 성공 코드로 변경했습니다.

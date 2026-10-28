@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.global.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.example.member.controller.dto.CreateMemberRequest;
-import org.example.member.domain.Member;
+import org.example.member.entity.Member;
 
 @Tag(name = "Member", description = "회원 생성·삭제 API")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(

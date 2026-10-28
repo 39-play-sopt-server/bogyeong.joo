@@ -1,7 +1,7 @@
 package org.example.post.controller.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.example.post.domain.Category;
+import org.example.post.entity.Category;
 
 @Schema(description = "게시글 수정 요청. 제목, 본문, 카테고리를 모두 전달합니다.")
 public record UpdatePostRequest(

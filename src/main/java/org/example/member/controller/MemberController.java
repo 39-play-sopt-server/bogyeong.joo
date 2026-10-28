@@ -2,7 +2,7 @@ package org.example.member.controller;
 
 import org.example.member.controller.docs.MemberControllerDocs;
 import org.example.member.controller.dto.CreateMemberRequest;
-import org.example.member.domain.Member;
+import org.example.member.entity.Member;
 import org.example.global.response.ApiResponse;
 import org.example.member.service.MemberService;
 import org.example.member.response.code.MemberSuccessCode;

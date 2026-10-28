@@ -1,7 +1,7 @@
 package org.example.post.controller.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.example.post.domain.Category;
+import org.example.post.entity.Category;
 
 @Schema(description = "게시글 작성 요청")
 public record CreatePostRequest(

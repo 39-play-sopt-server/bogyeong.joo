@@ -2,8 +2,8 @@ package org.example.post.controller;
 
 import org.example.post.controller.dto.CreatePostRequest;
 import org.example.post.controller.dto.UpdatePostRequest;
-import org.example.post.domain.Category;
-import org.example.post.domain.Post;
+import org.example.post.entity.Category;
+import org.example.post.entity.Post;
 import org.example.post.controller.docs.PostControllerDocs;
 import org.example.global.response.ApiResponse;
 import org.example.post.service.PostService;
@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.example.post.controller.dto.PostListResponse;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/v1/posts", produces = "application/json")
@@ -36,10 +37,20 @@ public class PostController implements PostControllerDocs {
     public ResponseEntity<ApiResponse<PostListResponse>> findAll(
             @RequestParam(name = "cursor", required = false) String cursor,
             @RequestParam(name = "size", defaultValue = "10") int size,
-            @RequestParam(name = "category", required = false) Category category,
-            @RequestParam(name = "title", required = false) String title
+            @RequestParam(name = "category", required = false) Category category
     ) {
-        return ApiResponse.toResponseEntity(PostSuccessCode.POST_LIST_FOUND, service.findAll(cursor, size, category, title));
+        return ApiResponse.toResponseEntity(PostSuccessCode.POST_LIST_FOUND, service.findAll(cursor, size, category));
+    }
+
+    // 게시글 검색
+    @Override
+    @GetMapping(path = "/search")
+    public ResponseEntity<ApiResponse<List<Post>>> search(
+            @RequestParam(name = "keyword", required = false) String keyword,
+            @RequestParam(name = "memberId", required = false) Long memberId,
+            @RequestParam(name = "category", required = false) Category category
+    ) {
+        return ApiResponse.toResponseEntity(PostSuccessCode.POST_SEARCHED, service.search(keyword, memberId, category));
     }
 
     // 게시글 단건 조회

@@ -1,7 +1,7 @@
 package org.example.post.controller.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.example.post.domain.Post;
+import org.example.post.entity.Post;
 
 import java.util.List;
 

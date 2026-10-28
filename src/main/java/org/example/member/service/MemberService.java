@@ -1,6 +1,6 @@
 package org.example.member.service;
 
-import org.example.member.domain.Member;
+import org.example.member.entity.Member;
 import org.example.member.exception.MemberNotFoundException;
 import org.example.member.repository.MemberRepository;
 import org.example.post.repository.PostRepository;

@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 
 public enum PostErrorCode implements ErrorCode {
     POST_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 게시글입니다."),
+    SEARCH_KEYWORD_REQUIRED(HttpStatus.BAD_REQUEST, "검색어는 비어 있을 수 없습니다."),
     TITLE_REQUIRED(HttpStatus.BAD_REQUEST, "제목은 비어 있을 수 없습니다."),
     CONTENT_REQUIRED(HttpStatus.BAD_REQUEST, "본문은 비어 있을 수 없습니다."),
     CATEGORY_REQUIRED(HttpStatus.BAD_REQUEST, "카테고리를 선택해주세요."),

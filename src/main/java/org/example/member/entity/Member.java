@@ -1,4 +1,4 @@
-package org.example.member.domain;
+package org.example.member.entity;
 
 import org.example.global.entity.BaseEntity;
 import org.example.global.exception.BusinessException;

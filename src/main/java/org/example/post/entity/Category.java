@@ -1,4 +1,4 @@
-package org.example.post.domain;
+package org.example.post.entity;
 
 public enum Category {
     DAILY("일상"), QUESTION("질문"), INFORMATION("정보");
