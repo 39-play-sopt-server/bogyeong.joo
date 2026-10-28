@@ -1,23 +1,33 @@
 package org.example.domain;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import java.time.LocalDateTime;
 
+@Entity
 public class Post {
-    private final long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
     private String title;
     private String content;
     private Category category;
-    private final String author;
-    private final LocalDateTime createdAt;
+    private String author;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private long viewCount;
 
-    public Post(long id, String title, String content, Category category, String author) {
+    protected Post() {
+    }
+
+    public Post(String title, String content, Category category, String author) {
         validateText(title, "제목");
         validateText(content, "본문");
         validateText(author, "작성자");
         validateCategory(category);
-        this.id = id;
         this.title = title.trim();
         this.content = content.trim();
         this.category = category;

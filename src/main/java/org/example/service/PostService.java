@@ -4,25 +4,26 @@ import org.example.domain.Category;
 import org.example.domain.Post;
 import org.example.exception.PostNotFoundException;
 import org.example.repository.PostRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class PostService {
     private final PostRepository repository;
-    private final PostIdGenerator idGenerator;
 
-    public PostService(PostRepository repository, PostIdGenerator idGenerator) {
+    public PostService(PostRepository repository) {
         this.repository = repository;
-        this.idGenerator = idGenerator;
     }
 
+    @Transactional
     public Post create(String title, String content, Category category, String author) {
-        Post post = new Post(idGenerator.generate(), title, content, category, author);
-        repository.save(post);
-        return post;
+        Post post = new Post(title, content, category, author);
+        return repository.save(post);
     }
 
     public List<Post> findAll(int page, int size, Category category) {
@@ -33,7 +34,7 @@ public class PostService {
             throw new IllegalArgumentException("size는 1 이상이어야 합니다.");
         }
 
-        List<Post> posts = repository.findAll();
+        List<Post> posts = repository.findAll(Sort.by("id").ascending());
         if (category != null) {
             List<Post> filteredPosts = new ArrayList<>();
             for (Post post : posts) {
@@ -55,27 +56,26 @@ public class PostService {
     }
 
     public Post findById(long id) {
-        Post post = repository.findById(id);
-        if (post == null) {
-            throw new PostNotFoundException(id);
-        }
-        return post;
+        return repository.findById(id)
+                .orElseThrow(() -> new PostNotFoundException(id));
     }
 
     // 상세 조회에서만 조회수를 증가시키고, 수정과 삭제에서는 기존 조회를 사용
+    @Transactional
     public Post getDetail(long id) {
         Post post = findById(id);
         post.increaseViewCount();
         return post;
     }
 
+    @Transactional
     public Post update(long id, String title, String content, Category category) {
         Post post = findById(id);
         post.update(title, content, category);
-        repository.save(post);
         return post;
     }
 
+    @Transactional
     public void delete(long id) {
         findById(id);
         repository.deleteById(id);
