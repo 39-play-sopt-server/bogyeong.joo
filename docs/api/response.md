@@ -28,8 +28,8 @@
 
 ## 오류 코드
 
-- 회원: MEMBER_NOT_FOUND는 404, NAME_REQUIRED는 400입니다.
-- 게시글: POST_NOT_FOUND는 404입니다. TITLE_REQUIRED, CONTENT_REQUIRED, CATEGORY_REQUIRED, AUTHOR_REQUIRED, INVALID_CURSOR, INVALID_PAGE_SIZE는 400입니다.
+- 회원: MEMBER_NOT_FOUND는 404, NAME_REQUIRED, NAME_TOO_LONG은 400입니다.
+- 게시글: POST_NOT_FOUND는 404입니다. TITLE_REQUIRED, CONTENT_REQUIRED, TITLE_TOO_LONG, CONTENT_TOO_LONG, CATEGORY_REQUIRED, AUTHOR_REQUIRED, INVALID_CURSOR, INVALID_PAGE_SIZE는 400입니다.
 - 글로벌 요청 오류: JSON 구문·타입 오류와 파라미터 변환 오류 등은 INVALID_REQUEST로 처리합니다.
 - 글로벌 HTTP 오류: RESOURCE_NOT_FOUND(404), METHOD_NOT_ALLOWED(405), NOT_ACCEPTABLE(406), UNSUPPORTED_MEDIA_TYPE(415)를 구분합니다. 그 외 Spring MVC 오류도 원래 HTTP 상태와 필요한 헤더를 유지합니다.
 - 예상하지 못한 오류: INTERNAL_SERVER_ERROR(500)로 응답하고 서버 로그에 상세 예외를 기록합니다. 내부 예외 메시지는 응답에 노출하지 않습니다.
@@ -58,6 +58,13 @@
 - 응답은 POST_SEARCHED 코드와 data의 게시글 목록입니다. 생성일·ID 내림차순이며 검색은 조회수를 증가시키지 않습니다. 작성자도 함께 조회해 응답의 이름을 사용할 수 있도록 합니다.
 - 기존 GET /api/v1/posts의 카테고리·커서 목록 조회는 유지합니다. 검색 API에는 페이지네이션과 검색 인덱스 최적화를 포함하지 않습니다.
 - 참고: [Spring Data JPA - Specification](https://docs.spring.io/spring-data/jpa/reference/jpa/specifications.html)
+## 저장과 입력 검증
+
+- 작성자 이름은 응답의 name으로 통일합니다. author는 반환하지 않습니다.
+- 앞뒤 공백 제거 후 이름은 50자, 제목은 100자, 본문은 10000자까지 허용합니다. 길이는 유니코드 코드 포인트 수로 검사하며 초과하면 각각 NAME_TOO_LONG, TITLE_TOO_LONG, CONTENT_TOO_LONG(400)을 반환합니다.
+- 카테고리는 EnumType.STRING으로 저장합니다. 기존 숫자 데이터와 CHECK 제약은 함께 변환해야 합니다. 기존 DB용 수동 스크립트는 src/main/resources/db/manual/migrate-post-category-and-lengths.sql에 있습니다. 현재 로컬 DB에는 변환을 적용했습니다.
+- 상세 조회는 DB에서 viewCount = viewCount + 1로 갱신합니다. 변경 후 영속성 컨텍스트를 비우고 다시 조회하며, 게시글 수정에는 DynamicUpdate를 적용해 이전 조회수로 덮어쓰지 않도록 합니다.
+
 ## 기존 응답과 달라진 점
 
 - 공통 성공 코드 SUCCESS를 작업별 성공 코드로 변경했습니다.

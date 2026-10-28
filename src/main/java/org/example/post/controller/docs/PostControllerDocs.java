@@ -38,6 +38,7 @@ public interface PostControllerDocs {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
             description = """
+            길이 초과: TITLE_TOO_LONG, CONTENT_TOO_LONG<br>
             입력 누락: TITLE_REQUIRED, CONTENT_REQUIRED, CATEGORY_REQUIRED, AUTHOR_REQUIRED<br>
             JSON·필드 타입 오류: INVALID_REQUEST
             """,
@@ -144,6 +145,7 @@ public interface PostControllerDocs {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
             description = """
+            길이 초과: TITLE_TOO_LONG, CONTENT_TOO_LONG<br>
             입력 누락: TITLE_REQUIRED, CONTENT_REQUIRED, CATEGORY_REQUIRED<br>
             요청 형식 오류: INVALID_REQUEST
             """,

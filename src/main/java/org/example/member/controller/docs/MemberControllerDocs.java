@@ -34,7 +34,7 @@ public interface MemberControllerDocs {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400",
             description = """
-            이름 누락·공백: NAME_REQUIRED<br>
+            이름 누락·공백: NAME_REQUIRED / 이름 50자 초과: NAME_TOO_LONG<br>
             JSON·필드 타입 오류: INVALID_REQUEST
             """,
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class),

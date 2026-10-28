@@ -71,9 +71,10 @@ public class PostService {
 
     @Transactional
     public Post getDetail(long id) {
-        Post post = findById(id);
-        post.increaseViewCount();
-        return post;
+        if (repository.increaseViewCount(id) == 0) {
+            throw new PostNotFoundException();
+        }
+        return findById(id);
     }
 
     @Transactional

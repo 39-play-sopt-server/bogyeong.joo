@@ -16,7 +16,7 @@ public class Member extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String name;
 
     protected Member() {
@@ -30,6 +30,10 @@ public class Member extends BaseEntity {
     private void validateName(String value) {
         if (value == null || value.isBlank()) {
             throw new BusinessException(MemberErrorCode.NAME_REQUIRED);
+        }
+        String trimmed = value.trim();
+        if (trimmed.codePointCount(0, trimmed.length()) > 50) {
+            throw new BusinessException(MemberErrorCode.NAME_TOO_LONG);
         }
     }
 

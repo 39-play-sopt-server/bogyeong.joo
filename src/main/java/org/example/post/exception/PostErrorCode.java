@@ -8,6 +8,8 @@ public enum PostErrorCode implements ErrorCode {
     SEARCH_KEYWORD_REQUIRED(HttpStatus.BAD_REQUEST, "검색어는 비어 있을 수 없습니다."),
     TITLE_REQUIRED(HttpStatus.BAD_REQUEST, "제목은 비어 있을 수 없습니다."),
     CONTENT_REQUIRED(HttpStatus.BAD_REQUEST, "본문은 비어 있을 수 없습니다."),
+    TITLE_TOO_LONG(HttpStatus.BAD_REQUEST, "제목은 100자 이하여야 합니다."),
+    CONTENT_TOO_LONG(HttpStatus.BAD_REQUEST, "본문은 10000자 이하여야 합니다."),
     CATEGORY_REQUIRED(HttpStatus.BAD_REQUEST, "카테고리를 선택해주세요."),
     AUTHOR_REQUIRED(HttpStatus.BAD_REQUEST, "작성자 회원 ID를 입력해주세요."),
     INVALID_CURSOR(HttpStatus.BAD_REQUEST, "올바르지 않은 게시글 커서입니다."),

@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.example.post.entity.enums.Category;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,6 +37,10 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     @Override
     @EntityGraph(attributePaths = "member")
     List<Post> findAll(Specification<Post> specification, Sort sort);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("UPDATE Post p SET p.viewCount = p.viewCount + 1 WHERE p.id = :id")
+    int increaseViewCount(@Param("id") long id);
 
     void deleteByMemberId(Long memberId);
 }
