@@ -1,9 +1,11 @@
-package org.example.service;
+package org.example.post.service;
 
-import org.example.domain.Category;
-import org.example.domain.Post;
-import org.example.exception.PostNotFoundException;
-import org.example.repository.PostRepository;
+import org.example.member.service.MemberService;
+
+import org.example.post.domain.Category;
+import org.example.post.domain.Post;
+import org.example.post.exception.PostNotFoundException;
+import org.example.post.repository.PostRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,14 +17,19 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class PostService {
     private final PostRepository repository;
+    private final MemberService memberService;
 
-    public PostService(PostRepository repository) {
+    public PostService(PostRepository repository, MemberService memberService) {
         this.repository = repository;
+        this.memberService = memberService;
     }
 
     @Transactional
-    public Post create(String title, String content, Category category, String author) {
-        Post post = new Post(title, content, category, author);
+    public Post create(String title, String content, Category category, Long memberId) {
+        if (memberId == null) {
+            throw new IllegalArgumentException("작성자 회원 ID를 입력해주세요.");
+        }
+        Post post = new Post(title, content, category, memberService.findById(memberId));
         return repository.save(post);
     }
 

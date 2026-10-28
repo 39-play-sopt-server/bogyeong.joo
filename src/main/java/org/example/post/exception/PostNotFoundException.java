@@ -1,4 +1,4 @@
-package org.example.exception;
+package org.example.post.exception;
 
 public class PostNotFoundException extends RuntimeException {
     public PostNotFoundException(long id) {

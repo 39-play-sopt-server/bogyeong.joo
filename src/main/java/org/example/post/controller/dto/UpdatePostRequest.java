@@ -1,6 +1,6 @@
-package org.example.controller.dto;
+package org.example.post.controller.dto;
 
-import org.example.domain.Category;
+import org.example.post.domain.Category;
 
 public record UpdatePostRequest(String title, String content, Category category) {
 }

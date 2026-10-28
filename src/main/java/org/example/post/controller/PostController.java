@@ -1,12 +1,12 @@
-package org.example.controller;
+package org.example.post.controller;
 
-import org.example.controller.dto.CreatePostRequest;
-import org.example.controller.dto.UpdatePostRequest;
-import org.example.domain.Category;
-import org.example.domain.Post;
-import org.example.controller.docs.PostControllerDocs;
+import org.example.post.controller.dto.CreatePostRequest;
+import org.example.post.controller.dto.UpdatePostRequest;
+import org.example.post.domain.Category;
+import org.example.post.domain.Post;
+import org.example.post.controller.docs.PostControllerDocs;
 import org.example.global.response.ApiResponse;
-import org.example.service.PostService;
+import org.example.post.service.PostService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +26,7 @@ public class PostController implements PostControllerDocs {
     @Override
     @PostMapping
     public ResponseEntity<ApiResponse<Post>> create(@RequestBody CreatePostRequest request) {
-        Post post = service.create(request.title(), request.content(), request.category(), request.author());
+        Post post = service.create(request.title(), request.content(), request.category(), request.memberId());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("게시글이 작성되었습니다.", post));
     }

@@ -1,38 +1,47 @@
-package org.example.domain;
+package org.example.post.domain;
+
+import org.example.member.domain.Member;
+import org.example.global.domain.BaseEntity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 
 @Entity
-public class Post {
+public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
     private String title;
     private String content;
     private Category category;
-    private String author;
-    private LocalDateTime createdAt;
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
     private LocalDateTime updatedAt;
     private long viewCount;
 
     protected Post() {
     }
 
-    public Post(String title, String content, Category category, String author) {
+    public Post(String title, String content, Category category, Member member) {
         validateText(title, "제목");
         validateText(content, "본문");
-        validateText(author, "작성자");
+        if (member == null) {
+            throw new IllegalArgumentException("작성자를 선택해주세요.");
+        }
         validateCategory(category);
         this.title = title.trim();
         this.content = content.trim();
         this.category = category;
-        this.author = author.trim();
-        this.createdAt = LocalDateTime.now();
+        this.member = member;
         this.updatedAt = null;
         this.viewCount = 0;
     }
@@ -78,10 +87,14 @@ public class Post {
         return category;
     }
     public String getAuthor() {
-        return author;
+        return member.getName();
     }
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
+    public String getName() {
+        return member.getName();
+    }
+    @JsonIgnore
+    public Member getMember() {
+        return member;
     }
     public synchronized LocalDateTime getUpdatedAt() {
         return updatedAt;
