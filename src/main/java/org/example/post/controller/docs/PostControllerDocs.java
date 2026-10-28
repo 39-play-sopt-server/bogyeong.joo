@@ -85,8 +85,7 @@ public interface PostControllerDocs {
             기본값 10, 범위 1~100
             """, schema = @Schema(defaultValue = "10", minimum = "1", maximum = "100")) int size,
             @Parameter(name = "category", description = """
-            생략하면 전체 카테고리 조회.<br>
-            DAILY(일상), QUESTION(질문), INFORMATION(정보)
+            생략하면 전체 카테고리 조회.
             """, example = "DAILY") Category category
     );
 
@@ -105,7 +104,7 @@ public interface PostControllerDocs {
     ResponseEntity<ApiResponse<List<Post>>> search(
             @Parameter(description = "제목에 포함된 검색어. 생략하면 제목 조건 제외", example = "세미나") String keyword,
             @Parameter(description = "작성자 회원 ID. 생략하면 작성자 조건 제외", example = "1") Long memberId,
-            @Parameter(description = "카테고리. 생략하면 카테고리 조건 제외", example = "DAILY") Category category);
+            @Parameter(description = "카테고리. 생략하면 카테고리 조건 제외") Category category);
 
     // 게시글 단건 조회
     @Operation(

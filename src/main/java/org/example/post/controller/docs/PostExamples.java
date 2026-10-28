@@ -20,11 +20,11 @@ final class PostExamples {
               "message": "게시글이 작성되었습니다.",
               "data": {
                 "id": 1,
-                "title": "세미나 후기",
-                "content": "JPA를 학습했습니다.",
+                "title": "SOPT 후기",
+                "content": "SOPT는 너무 너무 너무 좋당",
                 "category": "DAILY",
-                "author": "보경",
-                "name": "보경",
+                "author": "철수",
+                "name": "철수",
                 "createdAt": "2026-10-28T12:00:00",
                 "updatedAt": null,
                 "viewCount": 0
@@ -59,11 +59,11 @@ final class PostExamples {
                 "posts": [
                   {
                     "id": 1,
-                    "title": "세미나 후기",
-                    "content": "JPA를 학습했습니다.",
+                    "title": "SOPT 후기",
+                    "content": "SOPT는 너무 너무 너무 좋당.",
                     "category": "DAILY",
-                    "author": "보경",
-                    "name": "보경",
+                    "author": "철수",
+                    "name": "철수",
                     "createdAt": "2026-10-28T12:00:00",
                     "updatedAt": null,
                     "viewCount": 0
@@ -91,11 +91,11 @@ final class PostExamples {
               "message": "게시글을 조회했습니다.",
               "data": {
                 "id": 1,
-                "title": "세미나 후기",
-                "content": "JPA를 학습했습니다.",
+                "title": "SOPT 후기",
+                "content": "SOPT는 너무 너무 너무 좋당.",
                 "category": "DAILY",
-                "author": "보경",
-                "name": "보경",
+                "author": "철수",
+                "name": "철수",
                 "createdAt": "2026-10-28T12:00:00",
                 "updatedAt": null,
                 "viewCount": 1
@@ -128,11 +128,11 @@ final class PostExamples {
               "message": "게시글이 수정되었습니다.",
               "data": {
                 "id": 1,
-                "title": "수정한 세미나 후기",
-                "content": "트랜잭션도 학습했습니다.",
+                "title": "SOPT 후기 수정본",
+                "content": "SOPT는 너무 너무 너무 너무 좋당.",
                 "category": "INFORMATION",
-                "author": "보경",
-                "name": "보경",
+                "author": "철수",
+                "name": "철수",
                 "createdAt": "2026-10-28T12:00:00",
                 "updatedAt": "2026-10-28T13:00:00",
                 "viewCount": 0

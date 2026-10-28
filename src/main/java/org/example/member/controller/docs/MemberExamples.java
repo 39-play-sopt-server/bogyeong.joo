@@ -20,7 +20,7 @@ final class MemberExamples {
               "message": "회원이 생성되었습니다.",
               "data": {
                 "id": 1,
-                "name": "보경",
+                "name": "철수",
                 "createdAt": "2026-10-28T12:00:00"
               }
             }
