@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.example.post.controller.dto.PostListResponse;
 
 @RestController
 @RequestMapping(path = "/api/v1/posts")
@@ -34,12 +34,12 @@ public class PostController implements PostControllerDocs {
     // 게시글 목록 조회
     @Override
     @GetMapping
-    public ResponseEntity<ApiResponse<List<Post>>> findAll(
-            @RequestParam(name = "page", defaultValue = "0") int page,
+    public ResponseEntity<ApiResponse<PostListResponse>> findAll(
+            @RequestParam(name = "cursor", required = false) String cursor,
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "category", required = false) Category category
     ) {
-        return ResponseEntity.ok(ApiResponse.success("게시글 목록을 조회했습니다.", service.findAll(page, size, category)));
+        return ResponseEntity.ok(ApiResponse.success("게시글 목록을 조회했습니다.", service.findAll(cursor, size, category)));
     }
 
     // 게시글 단건 조회

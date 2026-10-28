@@ -49,6 +49,9 @@ class PostServiceIntegrationTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private org.springframework.jdbc.core.JdbcTemplate jdbc;
+
     private Long memberId;
 
     @BeforeEach
@@ -87,6 +90,14 @@ class PostServiceIntegrationTest {
                 .andExpect(jsonPath("$.data.name").value("작성자"));
 
         Post post = service.create("제목", "본문", Category.DAILY, memberId);
+        mvc.perform(get("/api/v1/posts").param("size", "1").param("category", "DAILY"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.posts[0].name").value("작성자"))
+                .andExpect(jsonPath("$.data.hasNext").value(false))
+                .andExpect(jsonPath("$.data.nextCursor").isEmpty());
+        mvc.perform(get("/api/v1/posts").param("cursor", "invalid"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("INVALID_INPUT"));
         mvc.perform(get("/api/v1/posts/" + post.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.name").value("작성자"))
@@ -128,7 +139,7 @@ class PostServiceIntegrationTest {
                 () -> service.create("제목", "본문", Category.DAILY, null));
         Post post = service.create("제목", "본문", Category.DAILY, memberId);
         assertEquals("작성자", service.getDetail(post.getId()).getName());
-        assertEquals("작성자", service.findAll(0, 10, null).getFirst().getName());
+        assertEquals("작성자", service.findAll(null, 10, null).posts().getFirst().getName());
     }
 
     @Test
@@ -165,7 +176,7 @@ class PostServiceIntegrationTest {
         Post created = service.create("제목", "본문", Category.DAILY, memberId);
 
         service.findById(created.getId());
-        service.findAll(0, 10, null);
+        service.findAll(null, 10, null);
         assertEquals(0, repository.findById(created.getId()).orElseThrow().getViewCount());
 
         service.getDetail(created.getId());
@@ -175,18 +186,53 @@ class PostServiceIntegrationTest {
     }
 
     @Test
-    void listPreservesIdOrderAndFiltersBeforePagination() {
+    void cursorFiltersCategoryAndContinuesAfterDeletedPost() {
         Post first = service.create("첫 글", "본문", Category.DAILY, memberId);
-        Post second = service.create("질문", "본문", Category.QUESTION, memberId);
+        service.create("질문", "본문", Category.QUESTION, memberId);
         Post third = service.create("다음 글", "본문", Category.DAILY, memberId);
 
-        assertEquals(List.of(first.getId(), second.getId(), third.getId()),
-                service.findAll(0, 10, null).stream().map(Post::getId).toList());
-        assertEquals(List.of(third.getId()),
-                service.findAll(1, 1, Category.DAILY).stream().map(Post::getId).toList());
-        assertTrue(service.findAll(2, 1, Category.DAILY).isEmpty());
+        var page = service.findAll(null, 1, Category.DAILY);
+        assertEquals(List.of(third.getId()), page.posts().stream().map(Post::getId).toList());
+        assertTrue(page.hasNext());
+        service.delete(third.getId());
+        service.create("새 글", "본문", Category.DAILY, memberId);
+
+        var next = service.findAll(page.nextCursor(), 1, Category.DAILY);
+        assertEquals(List.of(first.getId()), next.posts().stream().map(Post::getId).toList());
+        assertFalse(next.hasNext());
+        assertNull(next.nextCursor());
     }
 
+    @Test
+    void cursorOrdersByCreationTimeAndUsesIdForTies() {
+        Post first = service.create("첫 글", "본문", Category.DAILY, memberId);
+        Post second = service.create("둘째 글", "본문", Category.DAILY, memberId);
+        Post third = service.create("셋째 글", "본문", Category.DAILY, memberId);
+        var time = java.time.LocalDateTime.of(2026, 1, 1, 12, 0);
+        jdbc.update("UPDATE post SET created_at = ? WHERE id = ?", time, first.getId());
+        jdbc.update("UPDATE post SET created_at = ? WHERE id = ?", time, second.getId());
+        jdbc.update("UPDATE post SET created_at = ? WHERE id = ?", time.minusDays(1), third.getId());
+
+        var page = service.findAll(null, 1, null);
+        assertEquals(second.getId(), page.posts().getFirst().getId());
+        var next = service.findAll(page.nextCursor(), 1, null);
+        assertEquals(first.getId(), next.posts().getFirst().getId());
+        var last = service.findAll(next.nextCursor(), 1, null);
+        assertEquals(third.getId(), last.posts().getFirst().getId());
+        assertFalse(last.hasNext());
+        assertNull(last.nextCursor());
+    }
+
+    @Test
+    void cursorValidatesInputAndHandlesEmptyList() {
+        assertTrue(service.findAll(null, 10, null).posts().isEmpty());
+        assertFalse(service.findAll(null, 10, null).hasNext());
+        assertNull(service.findAll(null, 10, null).nextCursor());
+        assertThrows(IllegalArgumentException.class, () -> service.findAll("invalid", 10, null));
+        assertThrows(IllegalArgumentException.class, () -> service.findAll("", 10, null));
+        assertThrows(IllegalArgumentException.class, () -> service.findAll(null, 0, null));
+        assertThrows(IllegalArgumentException.class, () -> service.findAll(null, 101, null));
+    }
     @Test
     void deleteRemovesPostFromDatabase() {
         Post created = service.create("제목", "본문", Category.DAILY, memberId);

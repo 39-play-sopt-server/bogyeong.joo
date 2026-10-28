@@ -6,11 +6,12 @@ import org.example.post.domain.Category;
 import org.example.post.domain.Post;
 import org.example.post.exception.PostNotFoundException;
 import org.example.post.repository.PostRepository;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.PageRequest;
+import org.example.post.controller.dto.PostListResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
 @Service
@@ -33,35 +34,25 @@ public class PostService {
         return repository.save(post);
     }
 
-    public List<Post> findAll(int page, int size, Category category) {
-        if (page < 0) {
-            throw new IllegalArgumentException("page는 0 이상이어야 합니다.");
-        }
-        if (size <= 0) {
-            throw new IllegalArgumentException("size는 1 이상이어야 합니다.");
+    public PostListResponse findAll(String cursor, int size, Category category) {
+        if (size < 1 || size > 100) {
+            throw new IllegalArgumentException("size는 1 이상 100 이하여야 합니다.");
         }
 
-        List<Post> posts = repository.findAll(Sort.by("id").ascending());
-        if (category != null) {
-            List<Post> filteredPosts = new ArrayList<>();
-            for (Post post : posts) {
-                if (post.getCategory() == category) {
-                    filteredPosts.add(post);
-                }
-            }
-            posts = filteredPosts;
+        PostCursor position = cursor == null ? null : PostCursor.decode(cursor);
+        // 한 개를 더 조회해서 전체 개수 조회 없이 다음 목록의 존재 여부를 확인합니다.
+        List<Post> fetched = repository.findNextPosts(category,
+                position == null ? null : position.createdAt(),
+                position == null ? null : position.id(), PageRequest.of(0, size + 1));
+        boolean hasNext = fetched.size() > size;
+        List<Post> posts = List.copyOf(fetched.subList(0, Math.min(size, fetched.size())));
+        String nextCursor = null;
+        if (hasNext) {
+            Post last = posts.getLast();
+            nextCursor = new PostCursor(last.getCreatedAt(), last.getId()).encode();
         }
-        // 큰 page와 size를 곱해도 int 범위를 넘어서 잘못된 인덱스가 되지 않도록 합니다.
-        long offset = (long) page * size;
-        if (offset >= posts.size()) {
-            return List.of();
-        }
-
-        int fromIndex = (int) offset;
-        int toIndex = (int) Math.min(offset + size, posts.size());
-        return new ArrayList<>(posts.subList(fromIndex, toIndex));
+        return new PostListResponse(posts, nextCursor, hasNext);
     }
-
     public Post findById(long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new PostNotFoundException(id));

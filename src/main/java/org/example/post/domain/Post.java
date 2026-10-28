@@ -10,11 +10,17 @@ import jakarta.persistence.Id;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 
 @Entity
+@Table(indexes = {
+        @Index(name = "idx_post_created_at_id", columnList = "createdAt, id"),
+        @Index(name = "idx_post_category_created_at_id", columnList = "category, createdAt, id")
+})
 public class Post extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
