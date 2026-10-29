@@ -103,7 +103,7 @@ public interface PostControllerDocs {
             responseCode = "400", description = "공백 검색어: SEARCH_KEYWORD_REQUIRED / 회원 ID 타입·카테고리 값 오류: INVALID_REQUEST",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
     ResponseEntity<ApiResponse<List<Post>>> search(
-            @Parameter(description = "제목에 포함된 검색어. 생략하면 제목 조건 제외", example = "세미나") String keyword,
+            @Parameter(description = "제목에 포함된 검색어. 생략하면 제목 조건 제외", example = "SOPT") String keyword,
             @Parameter(description = "작성자 회원 ID. 생략하면 작성자 조건 제외", example = "1") Long memberId,
             @Parameter(description = "카테고리. 생략하면 카테고리 조건 제외") Category category);
 
