@@ -1,6 +1,6 @@
 package org.example.post.response.code;
 
-import org.example.global.response.code.SuccessCode;
+import org.example.global.apiPayload.code.SuccessCode;
 import org.springframework.http.HttpStatus;
 
 public enum PostSuccessCode implements SuccessCode {

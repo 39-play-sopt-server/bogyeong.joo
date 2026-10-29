@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.example.global.response.ApiResponse;
+import org.example.global.apiPayload.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.example.post.controller.dto.CreatePostRequest;
 import org.example.post.controller.dto.UpdatePostRequest;

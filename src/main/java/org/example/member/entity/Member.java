@@ -1,7 +1,7 @@
 package org.example.member.entity;
 
 import org.example.global.entity.BaseEntity;
-import org.example.global.exception.BusinessException;
+import org.example.global.apiPayload.exception.BusinessException;
 import org.example.member.exception.MemberErrorCode;
 
 import jakarta.persistence.Column;

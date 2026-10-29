@@ -1,8 +1,8 @@
-package org.example.global.exception;
+package org.example.global.apiPayload.exception;
 
-import org.example.global.response.ApiResponse;
-import org.example.global.response.code.ErrorCode;
-import org.example.global.response.code.GlobalErrorCode;
+import org.example.global.apiPayload.ApiResponse;
+import org.example.global.apiPayload.code.ErrorCode;
+import org.example.global.apiPayload.code.GlobalErrorCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;

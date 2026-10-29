@@ -1,6 +1,6 @@
-package org.example.global.exception;
+package org.example.global.apiPayload.exception;
 
-import org.example.global.response.code.ErrorCode;
+import org.example.global.apiPayload.code.ErrorCode;
 
 public class BusinessException extends RuntimeException {
     private final ErrorCode errorCode;

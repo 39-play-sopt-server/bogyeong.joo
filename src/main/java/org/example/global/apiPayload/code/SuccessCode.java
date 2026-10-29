@@ -1,8 +1,8 @@
-package org.example.global.response.code;
+package org.example.global.apiPayload.code;
 
 import org.springframework.http.HttpStatus;
 
-public interface ErrorCode {
+public interface SuccessCode {
     HttpStatus getStatus();
     String getCode();
     String getMessage();

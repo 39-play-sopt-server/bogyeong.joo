@@ -1,6 +1,6 @@
 package org.example.member.response.code;
 
-import org.example.global.response.code.SuccessCode;
+import org.example.global.apiPayload.code.SuccessCode;
 import org.springframework.http.HttpStatus;
 
 public enum MemberSuccessCode implements SuccessCode {

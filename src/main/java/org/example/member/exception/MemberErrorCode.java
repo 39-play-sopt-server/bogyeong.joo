@@ -1,6 +1,6 @@
 package org.example.member.exception;
 
-import org.example.global.response.code.ErrorCode;
+import org.example.global.apiPayload.code.ErrorCode;
 import org.springframework.http.HttpStatus;
 
 public enum MemberErrorCode implements ErrorCode {

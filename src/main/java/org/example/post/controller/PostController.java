@@ -5,7 +5,7 @@ import org.example.post.controller.dto.UpdatePostRequest;
 import org.example.post.entity.enums.Category;
 import org.example.post.entity.Post;
 import org.example.post.controller.docs.PostControllerDocs;
-import org.example.global.response.ApiResponse;
+import org.example.global.apiPayload.ApiResponse;
 import org.example.post.service.PostService;
 import org.example.post.response.code.PostSuccessCode;
 import org.springframework.http.ResponseEntity;

@@ -1,8 +1,8 @@
-package org.example.global.response;
+package org.example.global.apiPayload;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import org.example.global.response.code.ErrorCode;
-import org.example.global.response.code.SuccessCode;
+import org.example.global.apiPayload.code.ErrorCode;
+import org.example.global.apiPayload.code.SuccessCode;
 import org.springframework.http.ResponseEntity;
 
 @Schema(description = "공통 응답. HTTP 상태와 별도로 code로 결과를 구분합니다.")

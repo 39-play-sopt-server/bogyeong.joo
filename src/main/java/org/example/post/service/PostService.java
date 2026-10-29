@@ -6,7 +6,7 @@ import org.example.post.entity.enums.Category;
 import org.example.post.entity.Post;
 import org.example.post.exception.PostNotFoundException;
 import org.example.post.exception.PostErrorCode;
-import org.example.global.exception.BusinessException;
+import org.example.global.apiPayload.exception.BusinessException;
 import org.example.post.repository.PostRepository;
 import org.example.post.repository.PostSpecification;
 import org.springframework.data.domain.Sort;

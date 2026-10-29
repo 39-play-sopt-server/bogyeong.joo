@@ -1,6 +1,6 @@
 package org.example.member.exception;
 
-import org.example.global.exception.BusinessException;
+import org.example.global.apiPayload.exception.BusinessException;
 
 public class MemberNotFoundException extends BusinessException {
     public MemberNotFoundException() {

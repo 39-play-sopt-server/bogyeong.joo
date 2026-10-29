@@ -1,4 +1,4 @@
-package org.example.global.response.code;
+package org.example.global.apiPayload.code;
 
 import org.springframework.http.HttpStatus;
 

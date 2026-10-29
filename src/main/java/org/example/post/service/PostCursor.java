@@ -1,6 +1,6 @@
 package org.example.post.service;
 
-import org.example.global.exception.BusinessException;
+import org.example.global.apiPayload.exception.BusinessException;
 import org.example.post.exception.PostErrorCode;
 
 import java.nio.charset.StandardCharsets;

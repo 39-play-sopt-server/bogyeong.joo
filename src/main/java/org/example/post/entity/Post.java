@@ -2,7 +2,7 @@ package org.example.post.entity;
 
 import org.example.member.entity.Member;
 import org.example.post.entity.enums.Category;
-import org.example.global.exception.BusinessException;
+import org.example.global.apiPayload.exception.BusinessException;
 import org.example.post.exception.PostErrorCode;
 import org.example.global.entity.BaseEntity;
 
