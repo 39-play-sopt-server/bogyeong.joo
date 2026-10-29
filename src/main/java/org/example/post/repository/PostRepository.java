@@ -2,9 +2,6 @@ package org.example.post.repository;
 
 import org.example.post.entity.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.example.post.entity.enums.Category;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificationExecutor<Post> {
+public interface PostRepository extends JpaRepository<Post, Long> {
     @EntityGraph(attributePaths = "member")
     @Query("""
             SELECT p FROM Post p
@@ -34,9 +31,18 @@ public interface PostRepository extends JpaRepository<Post, Long>, JpaSpecificat
     @EntityGraph(attributePaths = "member")
     Optional<Post> findById(Long id);
 
-    @Override
     @EntityGraph(attributePaths = "member")
-    List<Post> findAll(Specification<Post> specification, Sort sort);
+    @Query("""
+            SELECT p FROM Post p
+            WHERE (:titlePattern IS NULL OR p.title LIKE :titlePattern ESCAPE '!')
+              AND (:memberId IS NULL OR p.member.id = :memberId)
+              AND (:category IS NULL OR p.category = :category)
+            ORDER BY p.createdAt DESC, p.id DESC
+            """)
+    List<Post> search(
+            @Param("titlePattern") String titlePattern,
+            @Param("memberId") Long memberId,
+            @Param("category") Category category);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Post p SET p.viewCount = p.viewCount + 1 WHERE p.id = :id")

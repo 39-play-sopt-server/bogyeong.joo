@@ -8,8 +8,6 @@ import org.example.post.exception.PostNotFoundException;
 import org.example.post.exception.PostErrorCode;
 import org.example.global.apiPayload.exception.BusinessException;
 import org.example.post.repository.PostRepository;
-import org.example.post.repository.PostSpecification;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.PageRequest;
 import org.example.post.controller.dto.PostListResponse;
 import org.springframework.stereotype.Service;
@@ -61,8 +59,12 @@ public class PostService {
         if (keyword != null && keyword.isBlank()) {
             throw new BusinessException(PostErrorCode.SEARCH_KEYWORD_REQUIRED);
         }
-        return repository.findAll(PostSpecification.search(keyword, memberId, category),
-                Sort.by(Sort.Direction.DESC, "createdAt", "id"));
+        String titlePattern = null;
+        if (keyword != null) {
+            String escaped = keyword.trim().replace("!", "!!").replace("%", "!%").replace("_", "!_");
+            titlePattern = "%" + escaped + "%";
+        }
+        return repository.search(titlePattern, memberId, category);
     }
     public Post findById(long id) {
         return repository.findById(id)
