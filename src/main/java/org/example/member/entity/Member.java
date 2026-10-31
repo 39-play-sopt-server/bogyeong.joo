@@ -1,0 +1,48 @@
+package org.example.member.entity;
+
+import org.example.global.entity.BaseEntity;
+import org.example.global.apiPayload.exception.BusinessException;
+import org.example.member.exception.MemberErrorCode;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
+@Entity
+public class Member extends BaseEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, length = 50)
+    private String name;
+
+    protected Member() {
+    }
+
+    public Member(String name) {
+        validateName(name);
+        this.name = name.trim();
+    }
+
+    private void validateName(String value) {
+        if (value == null || value.isBlank()) {
+            throw new BusinessException(MemberErrorCode.NAME_REQUIRED);
+        }
+        String trimmed = value.trim();
+        if (trimmed.codePointCount(0, trimmed.length()) > 50) {
+            throw new BusinessException(MemberErrorCode.NAME_TOO_LONG);
+        }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+}
