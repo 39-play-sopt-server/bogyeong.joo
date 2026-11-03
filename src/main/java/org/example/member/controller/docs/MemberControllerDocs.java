@@ -9,7 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.global.apiPayload.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.example.member.controller.dto.CreateMemberRequest;
-import org.example.member.entity.Member;
+import org.example.member.dto.response.MemberResponse;
 
 @Tag(name = "Member", description = "회원 생성·삭제 API")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -39,7 +39,7 @@ public interface MemberControllerDocs {
             """,
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class),
                     examples = @ExampleObject(value = MemberExamples.NAME_REQUIRED)))
-    ResponseEntity<ApiResponse<Member>> create(
+    ResponseEntity<ApiResponse<MemberResponse>> create(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "회원 이름을 전달합니다.", required = true) CreateMemberRequest request);
 
     // 회원 삭제

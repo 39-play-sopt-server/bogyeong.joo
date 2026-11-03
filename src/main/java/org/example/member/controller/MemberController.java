@@ -2,7 +2,7 @@ package org.example.member.controller;
 
 import org.example.member.controller.docs.MemberControllerDocs;
 import org.example.member.controller.dto.CreateMemberRequest;
-import org.example.member.entity.Member;
+import org.example.member.dto.response.MemberResponse;
 import org.example.global.apiPayload.ApiResponse;
 import org.example.member.service.MemberService;
 import org.example.member.response.code.MemberSuccessCode;
@@ -21,8 +21,8 @@ public class MemberController implements MemberControllerDocs {
     // 회원 생성
     @Override
     @PostMapping
-    public ResponseEntity<ApiResponse<Member>> create(@RequestBody CreateMemberRequest request) {
-        Member member = service.create(request.name());
+    public ResponseEntity<ApiResponse<MemberResponse>> create(@RequestBody CreateMemberRequest request) {
+        MemberResponse member = service.create(request.name());
         return ApiResponse.toResponseEntity(MemberSuccessCode.MEMBER_CREATED, member);
     }
 

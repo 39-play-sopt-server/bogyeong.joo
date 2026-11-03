@@ -10,9 +10,9 @@ import org.example.global.apiPayload.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.example.post.controller.dto.CreatePostRequest;
 import org.example.post.controller.dto.UpdatePostRequest;
-import org.example.post.controller.dto.PostListResponse;
+import org.example.post.dto.response.PostListResponse;
 import org.example.post.entity.enums.Category;
-import org.example.post.entity.Post;
+import org.example.post.dto.response.PostResponse;
 import java.util.List;
 
 @Tag(name = "Post", description = "게시글 생성·조회·수정·삭제 API")
@@ -49,7 +49,7 @@ public interface PostControllerDocs {
             description = "작성자 회원이 없음: MEMBER_NOT_FOUND",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class),
                     examples = @ExampleObject(value = PostExamples.MEMBER_NOT_FOUND)))
-    ResponseEntity<ApiResponse<Post>> create(
+    ResponseEntity<ApiResponse<PostResponse>> create(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "제목·본문·카테고리·회원 ID는 필수입니다.", required = true) CreatePostRequest request);
 
     // 게시글 목록 조회
@@ -102,7 +102,7 @@ public interface PostControllerDocs {
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
             responseCode = "400", description = "공백 검색어: SEARCH_KEYWORD_REQUIRED / 회원 ID 타입·카테고리 값 오류: INVALID_REQUEST",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
-    ResponseEntity<ApiResponse<List<Post>>> search(
+    ResponseEntity<ApiResponse<List<PostResponse>>> search(
             @Parameter(description = "제목에 포함된 검색어. 생략하면 제목 조건 제외", example = "SOPT") String keyword,
             @Parameter(description = "작성자 회원 ID. 생략하면 작성자 조건 제외", example = "1") Long memberId,
             @Parameter(description = "카테고리. 생략하면 카테고리 조건 제외") Category category);
@@ -127,7 +127,7 @@ public interface PostControllerDocs {
             description = "게시글이 없음: POST_NOT_FOUND",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class),
                     examples = @ExampleObject(value = PostExamples.POST_NOT_FOUND)))
-    ResponseEntity<ApiResponse<Post>> findById(
+    ResponseEntity<ApiResponse<PostResponse>> findById(
             @Parameter(description = "게시글 ID", example = "1", required = true) long id);
 
     // 게시글 수정
@@ -156,7 +156,7 @@ public interface PostControllerDocs {
             description = "게시글이 없음: POST_NOT_FOUND",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class),
                     examples = @ExampleObject(value = PostExamples.POST_NOT_FOUND)))
-    ResponseEntity<ApiResponse<Post>> update(
+    ResponseEntity<ApiResponse<PostResponse>> update(
             @Parameter(description = "게시글 ID", example = "1", required = true) long id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "제목·본문·카테고리를 모두 전달합니다.", required = true) UpdatePostRequest request);
 
