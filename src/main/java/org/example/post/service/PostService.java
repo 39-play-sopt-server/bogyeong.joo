@@ -46,6 +46,10 @@ public class PostService {
         List<Post> fetched = repository.findNextPosts(category,
                 position == null ? null : position.createdAt(),
                 position == null ? null : position.id(), PageRequest.of(0, size + 1));
+        return toListResponse(fetched, size);
+    }
+
+    private PostListResponse toListResponse(List<Post> fetched, int size) {
         boolean hasNext = fetched.size() > size;
         List<Post> posts = List.copyOf(fetched.subList(0, Math.min(size, fetched.size())));
         String nextCursor = null;
@@ -56,7 +60,10 @@ public class PostService {
         return new PostListResponse(posts.stream().map(PostResponse::from).toList(), nextCursor, hasNext);
     }
 
-    public List<PostResponse> search(String keyword, Long memberId, Category category) {
+    public PostListResponse search(String keyword, Long memberId, Category category, String cursor, int size) {
+        if (size < 1 || size > 100) {
+            throw new BusinessException(PostErrorCode.INVALID_PAGE_SIZE);
+        }
         if (keyword != null && keyword.isBlank()) {
             throw new BusinessException(PostErrorCode.SEARCH_KEYWORD_REQUIRED);
         }
@@ -65,7 +72,11 @@ public class PostService {
             String escaped = keyword.trim().replace("!", "!!").replace("%", "!%").replace("_", "!_");
             titlePattern = "%" + escaped + "%";
         }
-        return repository.search(titlePattern, memberId, category).stream().map(PostResponse::from).toList();
+        PostCursor position = cursor == null ? null : PostCursor.decode(cursor);
+        List<Post> fetched = repository.search(titlePattern, memberId, category,
+                position == null ? null : position.createdAt(),
+                position == null ? null : position.id(), PageRequest.of(0, size + 1));
+        return toListResponse(fetched, size);
     }
     public Post findById(long id) {
         return repository.findById(id)

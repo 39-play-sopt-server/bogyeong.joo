@@ -13,7 +13,6 @@ import org.example.post.controller.dto.UpdatePostRequest;
 import org.example.post.dto.response.PostListResponse;
 import org.example.post.entity.enums.Category;
 import org.example.post.dto.response.PostResponse;
-import java.util.List;
 
 @Tag(name = "Post", description = "게시글 생성·조회·수정·삭제 API")
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
@@ -94,18 +93,24 @@ public interface PostControllerDocs {
     @Operation(
             summary = "게시글 검색",
             description = """
-            게시글을 검색합니다.
+            게시글을 검색하며 목록 조회와 동일한 커서 페이지네이션을 사용합니다.
+            생성일 내림차순, 동일 생성일이면 ID 내림차순으로 정렬합니다.
+            다음 요청에는 검색 조건을 유지하고 nextCursor를 cursor로 전달합니다.
+            검색 조건을 변경하면 cursor를 생략하고 처음부터 조회합니다.
             """)
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "200", description = "검색 성공: POST_SEARCHED. data에 일치하는 게시글 목록 반환",
+            responseCode = "200", description = "검색 성공: POST_SEARCHED. data에 posts, nextCursor, hasNext 반환. 결과가 없으면 posts=[], nextCursor=null, hasNext=false",
             useReturnTypeSchema = true)
     @io.swagger.v3.oas.annotations.responses.ApiResponse(
-            responseCode = "400", description = "공백 검색어: SEARCH_KEYWORD_REQUIRED / 회원 ID 타입·카테고리 값 오류: INVALID_REQUEST",
+            responseCode = "400", description = "공백 검색어: SEARCH_KEYWORD_REQUIRED / 커서 오류: INVALID_CURSOR / 조회 크기 오류: INVALID_PAGE_SIZE / 회원 ID, 크기 타입·카테고리 값 오류: INVALID_REQUEST",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = ApiResponse.class)))
-    ResponseEntity<ApiResponse<List<PostResponse>>> search(
+    ResponseEntity<ApiResponse<PostListResponse>> search(
             @Parameter(description = "제목에 포함된 검색어. 생략하면 제목 조건 제외", example = "SOPT") String keyword,
             @Parameter(description = "작성자 회원 ID. 생략하면 작성자 조건 제외", example = "1") Long memberId,
-            @Parameter(description = "카테고리. 생략하면 카테고리 조건 제외") Category category);
+            @Parameter(description = "카테고리. 생략하면 카테고리 조건 제외") Category category,
+            @Parameter(description = "이전 응답의 nextCursor. 첫 조회 또는 검색 조건 변경 시 생략") String cursor,
+            @Parameter(description = "조회 개수. 기본값 10, 범위 1~100",
+                    schema = @Schema(defaultValue = "10", minimum = "1", maximum = "100")) int size);
 
     // 게시글 단건 조회
     @Operation(

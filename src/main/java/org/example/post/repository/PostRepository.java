@@ -37,12 +37,17 @@ public interface PostRepository extends JpaRepository<Post, Long> {
             WHERE (:titlePattern IS NULL OR p.title LIKE :titlePattern ESCAPE '!')
               AND (:memberId IS NULL OR p.member.id = :memberId)
               AND (:category IS NULL OR p.category = :category)
+              AND (:createdAt IS NULL OR p.createdAt < :createdAt
+                   OR (p.createdAt = :createdAt AND p.id < :id))
             ORDER BY p.createdAt DESC, p.id DESC
             """)
     List<Post> search(
             @Param("titlePattern") String titlePattern,
             @Param("memberId") Long memberId,
-            @Param("category") Category category);
+            @Param("category") Category category,
+            @Param("createdAt") LocalDateTime createdAt,
+            @Param("id") Long id,
+            Pageable pageable);
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("UPDATE Post p SET p.viewCount = p.viewCount + 1 WHERE p.id = :id")

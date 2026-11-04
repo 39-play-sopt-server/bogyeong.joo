@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import org.example.post.dto.response.PostListResponse;
-import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/v1/posts", produces = "application/json")
@@ -45,12 +44,14 @@ public class PostController implements PostControllerDocs {
     // 게시글 검색
     @Override
     @GetMapping(path = "/search")
-    public ResponseEntity<ApiResponse<List<PostResponse>>> search(
+    public ResponseEntity<ApiResponse<PostListResponse>> search(
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "memberId", required = false) Long memberId,
-            @RequestParam(name = "category", required = false) Category category
+            @RequestParam(name = "category", required = false) Category category,
+            @RequestParam(name = "cursor", required = false) String cursor,
+            @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-        return ApiResponse.toResponseEntity(PostSuccessCode.POST_SEARCHED, service.search(keyword, memberId, category));
+        return ApiResponse.toResponseEntity(PostSuccessCode.POST_SEARCHED, service.search(keyword, memberId, category, cursor, size));
     }
 
     // 게시글 단건 조회
