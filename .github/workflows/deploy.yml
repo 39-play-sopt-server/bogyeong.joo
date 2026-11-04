@@ -47,7 +47,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: assignment
-          path: build/libs/assignment.jar
+          path: build/libs/assignment-1.0-SNAPSHOT.jar
           if-no-files-found: error
           retention-days: 1
 
@@ -87,13 +87,21 @@ jobs:
 
       - name: Copy JAR to EC2
         run: |
+          ssh \
+            -i private_key.pem \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=15 \
+            "$EC2_USERNAME@$EC2_HOST" \
+            'mkdir -p /home/ubuntu/bogyeong.joo/build/libs'
+
           scp \
             -i private_key.pem \
             -o BatchMode=yes \
             -o StrictHostKeyChecking=yes \
             -o ConnectTimeout=15 \
-            build/libs/assignment.jar \
-            "$EC2_USERNAME@$EC2_HOST:/home/ubuntu/assignment.jar.next"
+            build/libs/assignment-1.0-SNAPSHOT.jar \
+            "$EC2_USERNAME@$EC2_HOST:/home/ubuntu/bogyeong.joo/build/libs/assignment-1.0-SNAPSHOT.jar.next"
 
       - name: Restart application on EC2
         run: |
@@ -103,10 +111,10 @@ jobs:
             -o StrictHostKeyChecking=yes \
             -o ConnectTimeout=15 \
             "$EC2_USERNAME@$EC2_HOST" 'bash -se' <<'REMOTE'
-          cd /home/ubuntu
+          cd /home/ubuntu/bogyeong.joo
 
           # 이번 애플리케이션의 기존 프로세스만 종료
-          APP_PATTERN='^/usr/bin/java -jar /home/ubuntu/assignment.jar$'
+          APP_PATTERN='^/usr/bin/java -jar /home/ubuntu/bogyeong.joo/build/libs/assignment-1.0-SNAPSHOT.jar$'
           OLD_PIDS=$(pgrep -u ubuntu -f "$APP_PATTERN" || true)
 
           if [ -n "$OLD_PIDS" ]; then
@@ -125,10 +133,12 @@ jobs:
             fi
           fi
 
-          mv assignment.jar.next assignment.jar
+          mv build/libs/assignment-1.0-SNAPSHOT.jar.next \
+             build/libs/assignment-1.0-SNAPSHOT.jar
 
           # SSH 연결이 끝나도 계속 실행
-          nohup /usr/bin/java -jar /home/ubuntu/assignment.jar \
+          nohup /usr/bin/java \
+            -jar /home/ubuntu/bogyeong.joo/build/libs/assignment-1.0-SNAPSHOT.jar \
             > /home/ubuntu/app.log 2>&1 < /dev/null &
 
           # 시작 직후 종료되는 경우를 확인

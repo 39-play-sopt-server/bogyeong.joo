@@ -54,5 +54,5 @@ java {
 }
 
 tasks.named('bootJar') {
-    archiveFileName = 'assignment.jar'
+    archiveFileName = 'assignment-1.0-SNAPSHOT.jar'
 }
