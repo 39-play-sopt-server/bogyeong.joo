@@ -5,7 +5,7 @@ import org.example.post.controller.dto.UpdatePostRequest;
 import org.example.post.entity.enums.Category;
 import org.example.post.dto.response.PostResponse;
 import org.example.post.controller.docs.PostControllerDocs;
-import org.example.global.apiPayload.ApiResponse;
+import org.example.global.apiPayload.BaseResponse;
 import org.example.post.service.PostService;
 import org.example.post.response.code.PostSuccessCode;
 import org.springframework.http.ResponseEntity;
@@ -25,58 +25,58 @@ public class PostController implements PostControllerDocs {
     // 게시글 작성
     @Override
     @PostMapping
-    public ResponseEntity<ApiResponse<PostResponse>> create(@RequestBody CreatePostRequest request) {
+    public ResponseEntity<BaseResponse<PostResponse>> create(@RequestBody CreatePostRequest request) {
         PostResponse post = service.create(request.title(), request.content(), request.category(), request.memberId());
-        return ApiResponse.toResponseEntity(PostSuccessCode.POST_CREATED, post);
+        return BaseResponse.toResponseEntity(PostSuccessCode.POST_CREATED, post);
     }
 
     // 게시글 목록 조회
     @Override
     @GetMapping
-    public ResponseEntity<ApiResponse<PostListResponse>> findAll(
+    public ResponseEntity<BaseResponse<PostListResponse>> findAll(
             @RequestParam(name = "cursor", required = false) String cursor,
             @RequestParam(name = "size", defaultValue = "10") int size,
             @RequestParam(name = "category", required = false) Category category
     ) {
-        return ApiResponse.toResponseEntity(PostSuccessCode.POST_LIST_FOUND, service.findAll(cursor, size, category));
+        return BaseResponse.toResponseEntity(PostSuccessCode.POST_LIST_FOUND, service.findAll(cursor, size, category));
     }
 
     // 게시글 검색
     @Override
     @GetMapping(path = "/search")
-    public ResponseEntity<ApiResponse<PostListResponse>> search(
+    public ResponseEntity<BaseResponse<PostListResponse>> search(
             @RequestParam(name = "keyword", required = false) String keyword,
             @RequestParam(name = "memberId", required = false) Long memberId,
             @RequestParam(name = "category", required = false) Category category,
             @RequestParam(name = "cursor", required = false) String cursor,
             @RequestParam(name = "size", defaultValue = "10") int size
     ) {
-        return ApiResponse.toResponseEntity(PostSuccessCode.POST_SEARCHED, service.search(keyword, memberId, category, cursor, size));
+        return BaseResponse.toResponseEntity(PostSuccessCode.POST_SEARCHED, service.search(keyword, memberId, category, cursor, size));
     }
 
     // 게시글 단건 조회
     @Override
     @GetMapping(path = "/{postId}")
-    public ResponseEntity<ApiResponse<PostResponse>> findById(@PathVariable(name = "postId") long id) {
-        return ApiResponse.toResponseEntity(PostSuccessCode.POST_FOUND, service.getDetail(id));
+    public ResponseEntity<BaseResponse<PostResponse>> findById(@PathVariable(name = "postId") long id) {
+        return BaseResponse.toResponseEntity(PostSuccessCode.POST_FOUND, service.getDetail(id));
     }
 
     // 게시글 수정
     @Override
     @PutMapping(path = "/{postId}")
-    public ResponseEntity<ApiResponse<PostResponse>> update(
+    public ResponseEntity<BaseResponse<PostResponse>> update(
             @PathVariable(name = "postId") long id,
             @RequestBody UpdatePostRequest request
     ) {
         PostResponse post = service.update(id, request.title(), request.content(), request.category());
-        return ApiResponse.toResponseEntity(PostSuccessCode.POST_UPDATED, post);
+        return BaseResponse.toResponseEntity(PostSuccessCode.POST_UPDATED, post);
     }
 
     // 게시글 삭제
     @Override
     @DeleteMapping(path = "/{postId}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable(name = "postId") long id) {
+    public ResponseEntity<BaseResponse<Void>> delete(@PathVariable(name = "postId") long id) {
         service.delete(id);
-        return ApiResponse.toResponseEntity(PostSuccessCode.POST_DELETED, null);
+        return BaseResponse.toResponseEntity(PostSuccessCode.POST_DELETED, null);
     }
 }

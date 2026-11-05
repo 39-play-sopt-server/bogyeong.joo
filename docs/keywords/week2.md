@@ -10,7 +10,7 @@
 - @RestController: @Controller와 @ResponseBody가 결합된 애너테이션입니다. 반환값을 HTTP 응답 본문으로 전달합니다.
 - @ResponseBody: 반환값을 메시지 변환기를 통해 JSON 등의 응답 데이터로 변환합니다. @RestController가 JSON만 반환하는 것은 아닙니다.
 - 사용 시점: HTML 화면을 제공하면 @Controller, 데이터를 제공하는 API라면 @RestController를 사용합니다. @Controller도 @ResponseBody나 ResponseEntity로 데이터를 응답할 수 있습니다.
-- 현재 적용: PostController는 ApiResponse 데이터를 반환하므로 @RestController를 사용하고, ResponseEntity로 상태코드와 본문을 설정합니다.
+- 현재 적용: PostController는 BaseResponse 데이터를 반환하므로 @RestController를 사용하고, ResponseEntity로 상태코드와 본문을 설정합니다.
 
 # 3. DTO, VO, DAO
 - DTO(Data Transfer Object): 계층이나 시스템 사이에서 데이터를 전달하는 객체입니다. 내부 도메인 구조와 API 요청·응답을 분리하고, 필요한 필드만 전달하기 위해 사용합니다. 현재 CreatePostRequest와 UpdatePostRequest가 해당합니다.

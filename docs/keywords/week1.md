@@ -6,7 +6,7 @@
 
 # 2. Java의 Generic 타입
 Generic은 클래스나 메서드에서 사용할 타입을 매개변수로 지정하는 기능입니다.
-예를 들어 List<Post>는 게시글을 담는 목록이고, ApiResponse<Post>는 게시글을 데이터로 반환하는 응답입니다.
+예를 들어 List<Post>는 게시글을 담는 목록이고, BaseResponse<Post>는 게시글을 데이터로 반환하는 응답입니다.
 Generic을 사용하면 잘못된 타입의 사용을 컴파일 단계에서 확인할 수 있고, 값을 꺼낼 때 불필요한 형변환을 줄일 수 있습니다. 같은 구조를 여러 타입에 재사용할 수 있다는 장점도 있습니다.
 
 # 3. primitive type과 wrapper class
@@ -25,4 +25,4 @@ Generic을 사용하면 잘못된 타입의 사용을 컴파일 단계에서 확
 - Post: 게시글의 상태를 관리합니다. 제목·본문 등의 값을 검증하고, 모든 검증이 끝난 뒤 자신의 상태를 수정합니다.
 - PostRepository / InMemoryPostRepository: 저장소 접근 계약과 실제 저장 구현을 분리합니다. 구현체는 HashMap으로 게시글을 관리합니다.
 - PostIdGenerator: 게시글의 고유 ID를 생성합니다.
-- ApiResponse: 성공 여부, 코드, 메시지, 데이터를 담아 클라이언트가 일관된 방식으로 응답을 처리하도록 합니다.
+- BaseResponse: 성공 여부, 코드, 메시지, 데이터를 담아 클라이언트가 일관된 방식으로 응답을 처리하도록 합니다.
