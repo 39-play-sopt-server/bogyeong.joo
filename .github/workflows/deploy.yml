@@ -1,0 +1,163 @@
+name: Spring Boot CI/CD on EC2
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: assignment-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: temurin
+
+      - name: Create application.yml
+        env:
+          APPLICATION: ${{ secrets.APPLICATION }}
+        run: |
+          test -n "$APPLICATION"
+          mkdir -p ./src/main/resources
+          printf '%s\n' "$APPLICATION" \
+            > ./src/main/resources/application.yml
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582
+
+      - name: Build with Gradle Wrapper
+        run: bash ./gradlew clean build --no-daemon
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: assignment
+          path: build/libs/assignment-1.0-SNAPSHOT.jar
+          if-no-files-found: error
+          retention-days: 1
+
+  deploy:
+    needs: build
+
+    # PR에서는 빌드만 하고, main push에서만 배포
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: assignment
+          path: build/libs/
+
+      - name: Prepare SSH
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_KNOWN_HOSTS: ${{ secrets.EC2_KNOWN_HOSTS }}
+        run: |
+          install -d -m 700 "$HOME/.ssh"
+
+          printf '%s\n' "$EC2_SSH_KEY" > private_key.pem
+          chmod 600 private_key.pem
+
+          printf '%s\n' "$EC2_KNOWN_HOSTS" \
+            > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+
+      - name: Copy JAR to EC2
+        run: |
+          ssh \
+            -i private_key.pem \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=15 \
+            "$EC2_USERNAME@$EC2_HOST" \
+            'mkdir -p /home/ubuntu/bogyeong.joo/build/libs'
+
+          scp \
+            -i private_key.pem \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=15 \
+            build/libs/assignment-1.0-SNAPSHOT.jar \
+            "$EC2_USERNAME@$EC2_HOST:/home/ubuntu/bogyeong.joo/build/libs/assignment-1.0-SNAPSHOT.jar.next"
+
+      - name: Restart application on EC2
+        run: |
+          ssh \
+            -i private_key.pem \
+            -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes \
+            -o ConnectTimeout=15 \
+            "$EC2_USERNAME@$EC2_HOST" 'bash -se' <<'REMOTE'
+          cd /home/ubuntu/bogyeong.joo
+
+          # 이번 애플리케이션의 기존 프로세스만 종료
+          APP_PATTERN='^/usr/bin/java -jar /home/ubuntu/bogyeong.joo/build/libs/assignment-1.0-SNAPSHOT.jar$'
+          OLD_PIDS=$(pgrep -u ubuntu -f "$APP_PATTERN" || true)
+
+          if [ -n "$OLD_PIDS" ]; then
+            kill $OLD_PIDS
+
+            for attempt in $(seq 1 30); do
+              if ! pgrep -u ubuntu -f "$APP_PATTERN" > /dev/null; then
+                break
+              fi
+              sleep 1
+            done
+
+            if pgrep -u ubuntu -f "$APP_PATTERN" > /dev/null; then
+              echo "Previous application did not stop."
+              exit 1
+            fi
+          fi
+
+          mv build/libs/assignment-1.0-SNAPSHOT.jar.next \
+             build/libs/assignment-1.0-SNAPSHOT.jar
+
+          # SSH 연결이 끝나도 계속 실행
+          nohup /usr/bin/java \
+            -jar /home/ubuntu/bogyeong.joo/build/libs/assignment-1.0-SNAPSHOT.jar \
+            > /home/ubuntu/app.log 2>&1 < /dev/null &
+
+          # 시작 직후 종료되는 경우를 확인
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --show-error \
+              --connect-timeout 2 \
+              --max-time 5 \
+              http://127.0.0.1:8080/v3/api-docs \
+              > /dev/null; then
+              echo "Deployment succeeded."
+              exit 0
+            fi
+            sleep 3
+          done
+
+          echo "Application startup check failed."
+          exit 1
+          REMOTE
+
+      - name: Remove private key
+        if: always()
+        run: rm -f private_key.pem

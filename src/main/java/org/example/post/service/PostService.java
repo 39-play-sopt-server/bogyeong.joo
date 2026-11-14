@@ -9,7 +9,8 @@ import org.example.post.exception.PostErrorCode;
 import org.example.global.apiPayload.exception.BusinessException;
 import org.example.post.repository.PostRepository;
 import org.springframework.data.domain.PageRequest;
-import org.example.post.controller.dto.PostListResponse;
+import org.example.post.dto.response.PostListResponse;
+import org.example.post.dto.response.PostResponse;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +29,12 @@ public class PostService {
     }
 
     @Transactional
-    public Post create(String title, String content, Category category, Long memberId) {
+    public PostResponse create(String title, String content, Category category, Long memberId) {
         if (memberId == null) {
             throw new BusinessException(PostErrorCode.AUTHOR_REQUIRED);
         }
         Post post = new Post(title, content, category, memberService.findById(memberId));
-        return repository.save(post);
+        return PostResponse.from(repository.save(post));
     }
 
     public PostListResponse findAll(String cursor, int size, Category category) {
@@ -45,6 +46,10 @@ public class PostService {
         List<Post> fetched = repository.findNextPosts(category,
                 position == null ? null : position.createdAt(),
                 position == null ? null : position.id(), PageRequest.of(0, size + 1));
+        return toListResponse(fetched, size);
+    }
+
+    private PostListResponse toListResponse(List<Post> fetched, int size) {
         boolean hasNext = fetched.size() > size;
         List<Post> posts = List.copyOf(fetched.subList(0, Math.min(size, fetched.size())));
         String nextCursor = null;
@@ -52,10 +57,13 @@ public class PostService {
             Post last = posts.getLast();
             nextCursor = new PostCursor(last.getCreatedAt(), last.getId()).encode();
         }
-        return new PostListResponse(posts, nextCursor, hasNext);
+        return new PostListResponse(posts.stream().map(PostResponse::from).toList(), nextCursor, hasNext);
     }
 
-    public List<Post> search(String keyword, Long memberId, Category category) {
+    public PostListResponse search(String keyword, Long memberId, Category category, String cursor, int size) {
+        if (size < 1 || size > 100) {
+            throw new BusinessException(PostErrorCode.INVALID_PAGE_SIZE);
+        }
         if (keyword != null && keyword.isBlank()) {
             throw new BusinessException(PostErrorCode.SEARCH_KEYWORD_REQUIRED);
         }
@@ -64,7 +72,11 @@ public class PostService {
             String escaped = keyword.trim().replace("!", "!!").replace("%", "!%").replace("_", "!_");
             titlePattern = "%" + escaped + "%";
         }
-        return repository.search(titlePattern, memberId, category);
+        PostCursor position = cursor == null ? null : PostCursor.decode(cursor);
+        List<Post> fetched = repository.search(titlePattern, memberId, category,
+                position == null ? null : position.createdAt(),
+                position == null ? null : position.id(), PageRequest.of(0, size + 1));
+        return toListResponse(fetched, size);
     }
     public Post findById(long id) {
         return repository.findById(id)
@@ -72,18 +84,18 @@ public class PostService {
     }
 
     @Transactional
-    public Post getDetail(long id) {
+    public PostResponse getDetail(long id) {
         if (repository.increaseViewCount(id) == 0) {
             throw new PostNotFoundException();
         }
-        return findById(id);
+        return PostResponse.from(findById(id));
     }
 
     @Transactional
-    public Post update(long id, String title, String content, Category category) {
+    public PostResponse update(long id, String title, String content, Category category) {
         Post post = findById(id);
         post.update(title, content, category);
-        return post;
+        return PostResponse.from(post);
     }
 
     @Transactional

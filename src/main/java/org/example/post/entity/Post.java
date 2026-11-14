@@ -19,7 +19,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.LocalDateTime;
 
@@ -104,10 +103,6 @@ public class Post extends BaseEntity {
     public Category getCategory() {
         return category;
     }
-    public String getName() {
-        return member.getName();
-    }
-    @JsonIgnore
     public Member getMember() {
         return member;
     }

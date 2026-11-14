@@ -47,3 +47,12 @@ tasks.withType(JavaExec).configureEach {
             '-Dstdout.encoding=UTF-8',
             '-Dstderr.encoding=UTF-8'
 }
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.named('bootJar') {
+    archiveFileName = 'assignment-1.0-SNAPSHOT.jar'
+}

@@ -1,6 +1,7 @@
 package org.example.member.service;
 
 import org.example.member.entity.Member;
+import org.example.member.dto.response.MemberResponse;
 import org.example.member.exception.MemberNotFoundException;
 import org.example.member.repository.MemberRepository;
 import org.example.post.repository.PostRepository;
@@ -19,8 +20,8 @@ public class MemberService {
     }
 
     @Transactional
-    public Member create(String name) {
-        return repository.save(new Member(name));
+    public MemberResponse create(String name) {
+        return MemberResponse.from(repository.save(new Member(name)));
     }
 
     public Member findById(long id) {
