@@ -9,10 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.global.apiPayload.BaseResponse;
 import org.springframework.http.ResponseEntity;
-import org.example.member.controller.dto.CreateMemberRequest;
-import org.example.member.dto.response.MemberResponse;
 
-@Tag(name = "Member", description = "회원 생성·삭제 API")
+@Tag(name = "Member", description = "인증된 회원 ID 조회·회원 삭제 API")
     @ApiResponse(
             responseCode = "500",
             description = "예상하지 못한 서버 오류: INTERNAL_SERVER_ERROR",
@@ -20,28 +18,10 @@ import org.example.member.dto.response.MemberResponse;
                     examples = @ExampleObject(value = MemberExamples.INTERNAL_SERVER_ERROR)))
 public interface MemberControllerDocs {
 
-    // 회원 생성
-    @Operation(
-            summary = "회원 생성",
-            description = """
-            이름을 받아 회원을 생성합니다.
-            """)
-    @ApiResponse(
-            responseCode = "201",
-            description = "회원 생성 성공: MEMBER_CREATED",
-            useReturnTypeSchema = true,
-            content = @Content(mediaType = "application/json",
-                    examples = @ExampleObject(value = MemberExamples.MEMBER_CREATED)))
-    @ApiResponse(
-            responseCode = "400",
-            description = """
-            이름 누락·공백: NAME_REQUIRED / 이름 50자 초과: NAME_TOO_LONG<br>
-            JSON·필드 타입 오류: INVALID_REQUEST
-            """,
-            content = @Content(mediaType = "application/json", schema = @Schema(implementation = BaseResponse.class),
-                    examples = @ExampleObject(value = MemberExamples.NAME_REQUIRED)))
-    ResponseEntity<BaseResponse<MemberResponse>> create(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "회원 이름을 전달합니다.", required = true) CreateMemberRequest request);
+    @Operation(summary = "인증된 회원 ID 조회")
+    @ApiResponse(responseCode = "200", description = "토큰에 담긴 회원 ID", useReturnTypeSchema = true)
+    @ApiResponse(responseCode = "401", description = "토큰이 없거나 유효하지 않음")
+    ResponseEntity<Long> me(@Parameter(hidden = true) Long memberId);
 
     // 회원 삭제
     @Operation(
