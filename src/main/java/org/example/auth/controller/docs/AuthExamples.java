@@ -19,11 +19,25 @@ final class AuthExamples {
             }
             """;
 
-    static final String SIGNUP_SUCCESS = "1";
+    static final String SIGNUP_SUCCESS = """
+            {
+              "success": true,
+              "code": "MEMBER_CREATED",
+              "message": "회원이 생성되었습니다.",
+              "data": {
+                "id": 1
+              }
+            }
+            """;
 
     static final String LOGIN_SUCCESS = """
             {
-              "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.example-signature"
+              "success": true,
+              "code": "LOGIN_SUCCESS",
+              "message": "로그인에 성공했습니다.",
+              "data": {
+                "accessToken": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.example-signature"
+              }
             }
             """;
 
