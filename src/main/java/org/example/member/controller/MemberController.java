@@ -1,12 +1,11 @@
 package org.example.member.controller;
 
 import org.example.member.controller.docs.MemberControllerDocs;
-import org.example.member.controller.dto.CreateMemberRequest;
-import org.example.member.dto.response.MemberResponse;
 import org.example.global.apiPayload.BaseResponse;
 import org.example.member.service.MemberService;
 import org.example.member.response.code.MemberSuccessCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,12 +17,10 @@ public class MemberController implements MemberControllerDocs {
         this.service = service;
     }
 
-    // 회원 생성
     @Override
-    @PostMapping
-    public ResponseEntity<BaseResponse<MemberResponse>> create(@RequestBody CreateMemberRequest request) {
-        MemberResponse member = service.create(request.name());
-        return BaseResponse.toResponseEntity(MemberSuccessCode.MEMBER_CREATED, member);
+    @GetMapping("/me")
+    public ResponseEntity<Long> me(@AuthenticationPrincipal Long memberId) {
+        return ResponseEntity.ok(memberId);
     }
 
     // 회원 삭제

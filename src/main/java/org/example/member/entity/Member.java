@@ -19,12 +19,19 @@ public class Member extends BaseEntity {
     @Column(nullable = false, length = 50)
     private String name;
 
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false)
+    private String password;
     protected Member() {
     }
 
-    public Member(String name) {
+    public Member(String name, String email, String password) {
         validateName(name);
         this.name = name.trim();
+        this.email = email;
+        this.password = password;
     }
 
     private void validateName(String value) {
@@ -44,5 +51,7 @@ public class Member extends BaseEntity {
     public String getName() {
         return name;
     }
+
+    public String getPassword() { return password; }
 
 }
