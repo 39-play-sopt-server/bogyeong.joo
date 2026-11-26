@@ -1,6 +1,8 @@
 package org.example.member.service;
 
+import org.example.global.apiPayload.exception.BusinessException;
 import org.example.member.entity.Member;
+import org.example.member.exception.MemberErrorCode;
 import org.example.member.exception.MemberNotFoundException;
 import org.example.member.repository.MemberRepository;
 import org.example.post.repository.PostRepository;
@@ -23,10 +25,18 @@ public class MemberService {
                 .orElseThrow(MemberNotFoundException::new);
     }
 
+    public boolean existsById(long id) {
+        return repository.existsById(id);
+    }
+
     @Transactional
-    public void delete(long id) {
-        Member member = findById(id);
-        postRepository.deleteByMemberId(id);
+    public void withdraw(long authenticatedMemberId, long targetMemberId) {
+        if (authenticatedMemberId != targetMemberId) {
+            throw new BusinessException(MemberErrorCode.MEMBER_WITHDRAWAL_FORBIDDEN);
+        }
+
+        Member member = findById(targetMemberId);
+        postRepository.deleteByMemberId(targetMemberId);
         repository.delete(member);
         repository.flush();
     }

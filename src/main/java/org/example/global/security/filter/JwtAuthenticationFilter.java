@@ -6,6 +6,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.global.security.jwt.JwtProvider;
+import org.example.member.service.MemberService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,9 +20,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtProvider jwtProvider;
+    private final MemberService memberService;
 
-    public JwtAuthenticationFilter(JwtProvider jwtProvider) {
+    public JwtAuthenticationFilter(JwtProvider jwtProvider, MemberService memberService) {
         this.jwtProvider = jwtProvider;
+        this.memberService = memberService;
     }
 
     @Override
@@ -32,12 +35,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (token != null) {
             try {
-                Long memberId = jwtProvider.getMemberId(token);
+                Long memberId = jwtProvider.getAccessTokenMemberId(token);
 
-                // 인증 완료된 Authentication 생성 후 SecurityContext에 저장
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(memberId, null, List.of());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (memberService.existsById(memberId)) {
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(memberId, null, List.of());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             } catch (JwtException | IllegalArgumentException e) {
                 // 유효하지 않은 토큰이면 인증 정보를 저장하지 않음
             }

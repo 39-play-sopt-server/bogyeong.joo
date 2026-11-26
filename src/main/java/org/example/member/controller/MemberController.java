@@ -23,11 +23,12 @@ public class MemberController implements MemberControllerDocs {
         return ResponseEntity.ok(memberId);
     }
 
-    // 회원 삭제
     @Override
     @DeleteMapping(path = "/{memberId}")
-    public ResponseEntity<BaseResponse<Void>> delete(@PathVariable(name = "memberId") long id) {
-        service.delete(id);
+    public ResponseEntity<BaseResponse<Void>> withdraw(
+            @PathVariable(name = "memberId") long targetMemberId,
+            @AuthenticationPrincipal Long authenticatedMemberId) {
+        service.withdraw(authenticatedMemberId, targetMemberId);
         return BaseResponse.toResponseEntity(MemberSuccessCode.MEMBER_DELETED, null);
     }
 }

@@ -68,6 +68,15 @@ final class AuthExamples {
             }
             """;
 
+    static final String INVALID_REFRESH_TOKEN = """
+            {
+              "success": false,
+              "code": "INVALID_REFRESH_TOKEN",
+              "message": "Refresh Token이 유효하지 않습니다.",
+              "data": null
+            }
+            """;
+
     static final String INTERNAL_SERVER_ERROR = """
             {
               "success": false,

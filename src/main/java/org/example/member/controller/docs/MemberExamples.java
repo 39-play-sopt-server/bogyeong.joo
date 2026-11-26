@@ -53,6 +53,15 @@ final class MemberExamples {
             }
             """;
 
+    static final String MEMBER_WITHDRAWAL_FORBIDDEN = """
+            {
+              "success": false,
+              "code": "MEMBER_WITHDRAWAL_FORBIDDEN",
+              "message": "본인 계정만 탈퇴할 수 있습니다.",
+              "data": null
+            }
+            """;
+
     static final String MEMBER_NOT_FOUND = """
             {
               "success": false,
