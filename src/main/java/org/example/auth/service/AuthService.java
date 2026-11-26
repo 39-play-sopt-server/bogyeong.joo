@@ -1,11 +1,14 @@
 package org.example.auth.service;
 
-import org.springframework.transaction.annotation.Transactional;
+import io.jsonwebtoken.JwtException;
+import org.example.auth.response.code.AuthErrorCode;
+import org.example.global.apiPayload.exception.BusinessException;
 import org.example.global.security.jwt.JwtProvider;
 import org.example.member.entity.Member;
 import org.example.member.repository.MemberRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -31,7 +34,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public String login(String email, String password) {
+    public LoginTokens login(String email, String password) {
         Member member = memberRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다."));
 
@@ -39,6 +42,25 @@ public class AuthService {
             throw new IllegalArgumentException("이메일 또는 비밀번호가 올바르지 않습니다.");
         }
 
-        return jwtProvider.createAccessToken(member.getId());
+        Long memberId = member.getId();
+        return new LoginTokens(jwtProvider.createAccessToken(memberId), jwtProvider.createRefreshToken(memberId));
     }
+
+    @Transactional(readOnly = true)
+    public String reissue(String refreshToken) {
+        Long memberId;
+        try {
+            memberId = jwtProvider.getRefreshTokenMemberId(refreshToken);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        if (!memberRepository.existsById(memberId)) {
+            throw new BusinessException(AuthErrorCode.INVALID_REFRESH_TOKEN);
+        }
+
+        return jwtProvider.createAccessToken(memberId);
+    }
+
+    public record LoginTokens(String accessToken, String refreshToken) {}
 }
